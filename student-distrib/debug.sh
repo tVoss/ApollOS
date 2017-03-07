@@ -1,7 +1,7 @@
 #!/bin/sh
 
 if [ -d /mnt/tmpmp3 ]; then
-rmdir /mnt/tmpmp3
+rm -rf /mnt/tmpmp3
 fi
 
 if [ -d /tmp/mp3 ]; then
@@ -19,5 +19,5 @@ cp -f /tmp/mp3/filesys_img /mnt/tmpmp3/
 umount /mnt/tmpmp3
 cp -f /tmp/mp3/mp3.img ./
 rm -rf /tmp/mp3
-rmdir /mnt/tmpmp3
+rm -rf /mnt/tmpmp3
 
