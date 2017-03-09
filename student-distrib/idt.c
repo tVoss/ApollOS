@@ -26,7 +26,7 @@ CREATE_EXCEPTION(EX_FLOATING_POINT,                 (XM) SIMD Floating Point Exc
 
 void EX_GENERIC() {
     cli();
-    printf("%s\n");
+    printf("Unknown exception!\n");
     sti();
 }
 
