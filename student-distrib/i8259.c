@@ -27,7 +27,7 @@ uint8_t slave_mask = 0xFF; 		/* IRQs 8-15 */
 void
 i8259_init(void)
 {
-	// enable slave irq line
+	// enable slave irq line (on line 2)
 	enable_irq(SLAVE_IRQ_LINE);
 
 	/* Initialization Control Word (ICW) */
@@ -53,15 +53,89 @@ i8259_init(void)
 }
 
 /* Enable (unmask) the specified IRQ */
+/*
+ * enable_irq(uint32_t irq_num)
+ *
+ * DESCRIPTION: enables the specified irq by unmasking. sends 
+ *				updated mask (active low) to data port. 
+ *
+ * INPUT: irq_num - what IRQ line to operate on
+ * OUTPUT: none
+ *
+ * SIDE EFFECTS: enables irq line
+ *
+*/
 void
 enable_irq(uint32_t irq_num)
 {
+	// check if irq_num is valid (0-7 for master, 8-15 for slave)
+	if (irq_num >= 0 && irq_num <= 15){
+		uint8_t mask = 0xFE;	// initial mask, only first line enabled
+		int i;
+		
+		// master irq
+		if (irq_num >= 0 && irq_num <= 7){
+			for (i = 0; i < irq_num; i++){
+				// left shift to enable next line,
+				// add one to disable previous line
+				mask = (mask << 1) + 1;
+			}
+			// send mask to PIC to enable irq line
+			master_mask = master_mask & mask; 
+ 			outb(master_mask, MASTER_8259_PORT + 1); 
+ 			return; 	
+		}
+
+		// slave irq
+		if (irq_num >= 8 && irq_num <= 15){
+			irq_num = irq_num - 8;	// get 8-15 irq into 0-7 irq range
+			for (i = 0; i < irq_num; i++){
+				mask = (mask << 1) + 1;
+			}
+			// send mask to PIC to enable irq line
+			slave_mask = slave_mask & mask; 
+ 			outb(slave_mask, SLAVE_8259_PORT + 1); 
+ 			return; 	
+		}
+	}
+	return;
 }
 
 /* Disable (mask) the specified IRQ */
 void
 disable_irq(uint32_t irq_num)
 {
+	// check if irq is valid (0-7 for master, 8-15 for slave)
+	if (irq_num >= 0 && irq_num <= 15){
+		uint8_t mask = 0x01;	// initial mask, only first line disabled
+		int i;
+
+		// master irq
+		if (irq_num >= 0 && irq_num <= 7){
+			for (i = 0; i < irq_num; i++){
+				// left shift to disable next line,
+				// shfiting leaves previous bit enabled
+				mask = (mask << 1);
+			}
+			// send mask to PIC to disable irq line
+			master_mask = master_mask | mask; 
+ 			outb(master_mask, MASTER_8259_PORT + 1); 
+ 			return; 	
+		}
+
+		// slave irq
+		if (irq_num >= 8 && irq_num <= 15){
+			irq_num = irq_num - 8;	// get 8-15 irq into 0-7 irq range
+			for (i = 0; i < irq_num; i++){
+				mask = (mask << 1);
+			}
+			// send mask to PIC to enable irq line
+			slave_mask = slave_mask | mask; 
+ 			outb(slave_mask, SLAVE_8259_PORT + 1); 
+ 			return; 	
+		}
+	}
+	return;
 }
 
 /*
