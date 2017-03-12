@@ -48,8 +48,8 @@ i8259_init(void)
 	outb(ICW3_SLAVE,SLAVE_8259_PORT+1);
 
 	// ICW 4 - controls how everything is to operate
-	outb(ICW4_MASTER,MASTER_8259_PORT+1);
-	outb(ICW4_SLAVE,SLAVE_8259_PORT+1);
+	outb(ICW4,MASTER_8259_PORT+1);
+	outb(ICW4,SLAVE_8259_PORT+1);
 }
 
 /*
