@@ -23,7 +23,7 @@ uint8_t slave_mask = 0xFF; 		/* IRQs 8-15 */
  *
  * SIDE EFFECTS: initalizes the PIC
  *
-*/
+ */
 void
 i8259_init(void)
 {
@@ -52,19 +52,18 @@ i8259_init(void)
 	outb(ICW4_SLAVE,SLAVE_8259_PORT+1);
 }
 
-/* Enable (unmask) the specified IRQ */
 /*
  * enable_irq(uint32_t irq_num)
  *
- * DESCRIPTION: enables the specified irq by unmasking. sends 
+ * DESCRIPTION: enables the specified irq by masking. sends 
  *				updated mask (active low) to data port. 
  *
- * INPUT: irq_num - what IRQ line to operate on
+ * INPUT: irq_num - what IRQ line to enable
  * OUTPUT: none
  *
  * SIDE EFFECTS: enables irq line
  *
-*/
+ */
 void
 enable_irq(uint32_t irq_num)
 {
@@ -101,7 +100,18 @@ enable_irq(uint32_t irq_num)
 	return;
 }
 
-/* Disable (mask) the specified IRQ */
+/*
+ * disable_irq(uint32_t irq_num)
+ *
+ * DESCRIPTION: disables the specified irq by masking. sends 
+ *				updated mask (active low) to data port. 
+ *
+ * INPUT: irq_num - what IRQ line to disable
+ * OUTPUT: none
+ *
+ * SIDE EFFECTS: disables irq line
+ *
+ */
 void
 disable_irq(uint32_t irq_num)
 {
@@ -150,7 +160,7 @@ disable_irq(uint32_t irq_num)
  *
  * SIDE EFFECTS: sends EOI to PIC
  *
-*/
+ */
 void
 send_eoi(uint32_t irq_num)
 {
