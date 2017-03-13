@@ -11,6 +11,9 @@
 #include "keyboard.h"
 #include "rtc.h"
 
+//added by Joey
+#include "paging.h"
+
 /* Macros. */
 /* Check if the bit BIT in FLAGS is set. */
 #define CHECK_FLAG(flags,bit)   ((flags) & (1 << (bit)))
@@ -172,6 +175,8 @@ entry (unsigned long magic, unsigned long addr)
 	sti();
     printf("Done!\n");
 
+	//Turn paging on
+	init_paging();
 
 	/* Execute the first program (`shell') ... */
 
