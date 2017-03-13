@@ -27,9 +27,6 @@ uint8_t slave_mask = 0xFF; 		/* IRQs 8-15 */
 void
 i8259_init(void)
 {
-	// enable slave irq line (on line 2)
-	enable_irq(SLAVE_IRQ_LINE);
-
 	/* Initialization Control Word (ICW) */
 
 	// ICW 1 - primary control word to intialize the PIC.
@@ -50,6 +47,9 @@ i8259_init(void)
 	// ICW 4 - controls how everything is to operate
 	outb(ICW4,MASTER_8259_PORT+1);
 	outb(ICW4,SLAVE_8259_PORT+1);
+
+	// enable slave irq line (on line 2)
+	enable_irq(SLAVE_IRQ_LINE);
 }
 
 /*

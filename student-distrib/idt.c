@@ -1,5 +1,6 @@
 #include "idt.h"
 
+#include "interrupt_handlers.h"
 #include "lib.h"
 #include "x86_desc.h"
 
@@ -90,6 +91,7 @@ void init_idt() {
     SET_IDT_ENTRY(idt[0x13], EX_FLOATING_POINT);
 
     // Special entries
+    SET_IDT_ENTRY(idt[INT_RTC], handle_rtc);
 
     lidt(idt_desc_ptr);
 

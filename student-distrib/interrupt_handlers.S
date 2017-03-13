@@ -1,27 +1,12 @@
-#define COOL(name, func)    \
-.globl name                         \
+#define MAKE_HANDLER(name, func)    \
+.globl name;                        \
 name:                               \
-    pusha;                          \
-    pushw %ds;                      \
-    pushw %es;                      \
-    pushw %fs;                      \
-    pushw %gs;                      \
-    movw $0x10, %ax;                \
-    movw %ax, %ds;                  \
-    movw %ax, %es;                  \
-    movw %ax, %fs;                  \
-    movw %ax, %gs;                  \
-    movl %esp, %eax;                \
-    pushl %eax;                     \
-    movl func, %eax;                \
-    call *%eax;                      \
-    popl %eax;                      \
-    popw %gs;                       \
-    popw %fs;                       \
-    popw %es;                       \
-    popw %ds;                       \
-    popa;                           \
-    add $8, %esp;                   \
-    iret;                           \
+    pushal;                         \
+    pushfl;                         \
+    call func;                      \
+    popfl;                          \
+    popal;                          \
+    sti;                            \
+    iret;
 
-COOL(handle_rtc, rtc_handler);
+MAKE_HANDLER(handle_rtc, rtc_handler);

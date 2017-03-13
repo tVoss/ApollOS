@@ -8,6 +8,8 @@
 #include "i8259.h"
 #include "debug.h"
 
+#include "rtc.h"
+
 /* Macros. */
 /* Check if the bit BIT in FLAGS is set. */
 #define CHECK_FLAG(flags,bit)   ((flags) & (1 << (bit)))
@@ -144,21 +146,28 @@ entry (unsigned long magic, unsigned long addr)
 		ltr(KERNEL_TSS);
 	}
 
+    printf("Welcome to ApollOS\n");
+
 	/* Init the PIC */
+    printf("Initing PIC... ");
 	i8259_init();
+    printf("Done!\n");
 
 	/* Initialize devices, memory, filesystem, enable device interrupts on the
 	 * PIC, any other initialization stuff... */
+    printf("Initing RTC... ");
+    init_rtc();
+    printf("Done!\n");
+
 
 	/* Enable interrupts */
 	/* Do not enable the following until after you have set up your
 	 * IDT correctly otherwise QEMU will triple fault and simple close
 	 * without showing you any output */
-	printf("Enabling Interrupts\n");
+	printf("Enabling Interrupts... ");
 	sti();
+    printf("Done!\n");
 
-    /* Add some branding */
-    printf("Welcome to ApollOS\n");
 
 	/* Execute the first program (`shell') ... */
 
