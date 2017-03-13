@@ -19,6 +19,7 @@ CREATE_EXCEPTION(EX_SEGMENT_NOT_PRESENT,            (NP) Segment Not Present!);
 CREATE_EXCEPTION(EX_STACK_FAULT,                    (SS) Stack Fault Exception!);
 CREATE_EXCEPTION(EX_GENERAL_PROTECTION,             (GP) General Protection Exception!);
 CREATE_EXCEPTION(EX_PAGE_FAULT,                     (PF) Page Fault Exception!);
+CREATE_EXCEPTION(EX_UNKNOWN,                        (UN) Unknown Exception!);
 CREATE_EXCEPTION(EX_FLOATING_POINT_ERROR,           (MF) x87 Floating-Point Error!);
 CREATE_EXCEPTION(EX_ALIGNMENT_CHECK,                (AC) Alignment Check Exception!);
 CREATE_EXCEPTION(EX_MACHINE_CHECK,                  (MC) Machine Check Exception!);
@@ -26,7 +27,7 @@ CREATE_EXCEPTION(EX_FLOATING_POINT,                 (XM) SIMD Floating Point Exc
 
 void EX_GENERIC() {
     cli();
-    printf("Unknown exception!\n");
+    printf("An unknown interrupt occured!\n");
     sti();
 }
 
@@ -82,7 +83,7 @@ void init_idt() {
     SET_IDT_ENTRY(idt[0x0C], EX_STACK_FAULT);
     SET_IDT_ENTRY(idt[0x0D], EX_GENERAL_PROTECTION);
     SET_IDT_ENTRY(idt[0x0E], EX_PAGE_FAULT);
-    //             No 0x0F
+    SET_IDT_ENTRY(idt[0x0F], EX_UNKNOWN);
     SET_IDT_ENTRY(idt[0x10], EX_FLOATING_POINT_ERROR);
     SET_IDT_ENTRY(idt[0x11], EX_ALIGNMENT_CHECK);
     SET_IDT_ENTRY(idt[0x12], EX_MACHINE_CHECK);
