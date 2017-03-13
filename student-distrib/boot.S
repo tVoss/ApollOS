@@ -27,14 +27,11 @@ continue:
 	# Load the GDT
     lgdt    gdt_desc_ptr
 
-    # Load the IDT
-    pushl   %eax    # Save callee saved registers
-    pushl   %ecx
-    pushl   %edx
+    # Load the IDT in C
+    # Save multiboot magic number
+    pushl %eax
     call init_idt
-    popl    %edx
-    popl    %ecx
-    popl    %eax
+    popl %eax
 
 	# Load CS with the new descriptor value
 	ljmp    $KERNEL_CS, $keep_going
