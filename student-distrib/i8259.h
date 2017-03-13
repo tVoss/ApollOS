@@ -30,6 +30,9 @@
 /* Slave line constant */
 #define SLAVE_IRQ_LINE	2
 
+/* RTC line constant */
+#define RTC_IRQ_LINE    8
+
 /* Externally-visible functions */
 
 /* Initialize both PICs */
