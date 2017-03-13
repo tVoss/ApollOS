@@ -3,7 +3,6 @@
 #include "interrupt_handlers.h"
 #include "lib.h"
 #include "x86_desc.h"
-#include "linkage.S"
 
 // Exception names and values taken from IA-32 Reference Manual Section 6.15
 CREATE_EXCEPTION(EX_DIVIDE_ERROR,                   (DE) Divide Error Exception!);
@@ -91,10 +90,9 @@ void init_idt() {
     SET_IDT_ENTRY(idt[0x12], EX_MACHINE_CHECK);
     SET_IDT_ENTRY(idt[0x13], EX_FLOATING_POINT);
 
-    SET_IDT_ENTRY(idt[0x21], KEYBOARD_LINKAGE);  // keyboard
-
     // Special entries
     SET_IDT_ENTRY(idt[INT_RTC], handle_rtc);
+    SET_IDT_ENTRY(idt[INT_KEYBOARD], handle_keyboard);
 
     lidt(idt_desc_ptr);
 

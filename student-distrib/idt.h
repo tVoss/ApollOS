@@ -8,13 +8,6 @@
 
 extern void init_idt();
 
-typedef struct regs {
-    unsigned int gs, fs, es, ds;
-    unsigned int edi, esi, ebp, esp, ebx, edx, ecx, eax;
-    unsigned int int_no, error_code;
-    unsigned int eip, cs, eflags, useresp, ss;
-} regs_t;
-
 // Marco to create generic exception handler
 #define CREATE_EXCEPTION(type, message) \
 void type() {                           \

@@ -2,10 +2,14 @@
 #define _KEYBOARD_H
 
 /* PIC Interrupt Line and IDT Vector Number */
-#define KEYBOARD_IRQ		1
-#define KEYBOARD_DATA_PORT	0x60
+#define KEYBOARD_PORT       0x60
 
 /* magic numbers */
 #define NUM_KEYS			60
+
+/* Initialize the keyboard */
+extern void init_keyboard();
+/* Process interrupts */
+extern void handle_keyboard();
 
 #endif

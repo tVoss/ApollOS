@@ -15,7 +15,7 @@ void init_rtc() {
     outb(prev | 0x40, CMOS_PORT);
 
     // 2Hz initially
-    rtc_set_frequency(2);
+    rtc_set_frequency(F2HZ);
 
     // Enable interrupts
     enable_irq(RTC_IRQ_LINE);
@@ -23,22 +23,15 @@ void init_rtc() {
 }
 
 void rtc_set_frequency(unsigned int freq) {
-    // Approximatly turn requested frequency to proper rate
-    int rate = freq ? 16 : 0;
-    while (freq >>= 1) {
-        rate--;
-    }
-    rate &= 0xF;    // Keep it within bounds
-
     cli();
     outb(RTC_REG_A, RTC_PORT);
     char prev = inb(CMOS_PORT);
     outb(RTC_REG_A, RTC_PORT);
-    outb((prev & 0xF0) | rate, CMOS_PORT);
+    outb((prev & 0xF0) | freq, CMOS_PORT);
     sti();
 }
 
-void rtc_handler(regs_t regs) {
+void rtc_handler() {
     cli();
 
     // Checkpoint 1

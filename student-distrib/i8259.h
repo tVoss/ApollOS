@@ -27,11 +27,14 @@
  * to declare the interrupt finished */
 #define EOI             0x60
 
+/* Keyboard line constant */
+#define KEYBOARD_IRQ_LINE   1
+
 /* Slave line constant */
-#define SLAVE_IRQ_LINE	2
+#define SLAVE_IRQ_LINE      2
 
 /* RTC line constant */
-#define RTC_IRQ_LINE    8
+#define RTC_IRQ_LINE        8
 
 /* Externally-visible functions */
 

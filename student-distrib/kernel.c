@@ -8,6 +8,7 @@
 #include "i8259.h"
 #include "debug.h"
 
+#include "keyboard.h"
 #include "rtc.h"
 
 /* Macros. */
@@ -159,6 +160,9 @@ entry (unsigned long magic, unsigned long addr)
     init_rtc();
     printf("Done!\n");
 
+    printf("Initing Keyboard... ");
+    init_keyboard();
+    printf("Done!\n");
 
 	/* Enable interrupts */
 	/* Do not enable the following until after you have set up your
