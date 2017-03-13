@@ -10,6 +10,10 @@
 #define RTC_REG_C   0x8C
 #define RTC_REG_D   0x8D
 
+#define RTC_ENABLE_INTERRUPT    0x40
+#define RTC_SET_RATE            0xF0
+
+/* All possible frequencies */
 typedef enum rtc_freq {
     F2HZ        = 15,
     F4HZ        = 14,
@@ -27,8 +31,11 @@ typedef enum rtc_freq {
     F0HZ        = 0
 } rtc_freq_t;
 
+/* Initialize the Real Time Clock */
 extern void init_rtc();
+/* Set the frequency of the clock */
 extern void rtc_set_frequency(rtc_freq_t freq);
+/* Handle clock interrupts */
 extern void rtc_handler();
 
 #endif

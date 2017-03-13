@@ -32,6 +32,21 @@ void EX_GENERIC() {
     sti();
 }
 
+/*
+ * init_idt(void)
+ *
+ * DESCRIPTION: Initializes the Interrupt Descriptor Table
+ *              with 256 generic entries. Intel exceptions
+ *              along with various device interrupt handlers
+ *              are set up for their corresponding vector,
+ *              and the rest are assigned a generic handler.
+ *
+ * INPUTS: 	none
+ * OUTPUTS: none
+ *
+ * SIDE EFFECTS: initalizes the IDT
+ *
+ */
 void init_idt() {
 
     int i;

@@ -1,3 +1,4 @@
+# Macro for creating generic handler connection
 #define MAKE_HANDLER(name, func)    \
 .globl name;                        \
 name:                               \

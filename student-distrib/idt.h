@@ -1,11 +1,13 @@
 #ifndef IDT_H_
 #define IDT_H_
 
+// Vectors with special purpose
 #define INT_PIT         0x20
 #define INT_KEYBOARD    0x21
 #define INT_RTC         0x28
 #define INT_SYSCALL     0x80
 
+/* Initialize the IDT */
 extern void init_idt();
 
 // Marco to create generic exception handler

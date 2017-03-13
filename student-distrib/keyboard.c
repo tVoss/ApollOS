@@ -11,6 +11,17 @@ static uint32_t scancode_map[60] = {
   'b', 'n', 'm',',', '.', '/', '\0', '*', '\0', ' ', '\0'
 };
 
+/*
+ * init_keyboard(void)
+ *
+ * DESCRIPTION: Initialize the keyboard on the PIC
+ *
+ * INPUTS: 	none
+ * OUTPUTS: none
+ *
+ * SIDE EFFECTS: Enables the Keyboard PIC line
+ *
+ */
 void init_keyboard() {
     cli();
     enable_irq(KEYBOARD_IRQ_LINE);
@@ -20,13 +31,11 @@ void init_keyboard() {
 /*
  * keyboard_handler()
  *
- * DESCRIPTION: initializes the keyboard on PIC and handels
- *              key press.
+ * DESCRIPTION: Handles keyboard key press.
  *
  * INPUTS: none
  * OUTPUTS: none
- * SIDE EFFECTS: enables keyboard line (line 1) on PIC.
- *               prints key pressed.
+ * SIDE EFFECTS: Prints the key pressed if valid
  *
  */
 void
