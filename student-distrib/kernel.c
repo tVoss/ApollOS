@@ -9,7 +9,9 @@
 #include "debug.h"
 
 #include "keyboard.h"
+#include "rofs.h"
 #include "rtc.h"
+#include "tests.h"
 
 /* Macros. */
 /* Check if the bit BIT in FLAGS is set. */
@@ -55,7 +57,12 @@ entry (unsigned long magic, unsigned long addr)
 		int mod_count = 0;
 		int i;
 		module_t* mod = (module_t*)mbi->mods_addr;
-		while(mod_count < mbi->mods_count) {
+
+        printf("Initing Read Only File System... ");
+        init_rofs((void *)mod->mod_start);
+        printf("Done!\n");
+
+        while(mod_count < mbi->mods_count) {
 			printf("Module %d loaded at address: 0x%#x\n", mod_count, (unsigned int)mod->mod_start);
 			printf("Module %d ends at address: 0x%#x\n", mod_count, (unsigned int)mod->mod_end);
 			printf("First few bytes of module:\n");
@@ -172,6 +179,12 @@ entry (unsigned long magic, unsigned long addr)
 	sti();
     printf("Done!\n");
 
+
+    printf("Executing Tests... ");
+    if(test_rofs()) {
+        printf("ROFS Test Failed!\n");
+    }
+    printf("Done!\n");
 
 	/* Execute the first program (`shell') ... */
 

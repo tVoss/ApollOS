@@ -70,7 +70,7 @@ void rtc_handler() {
     cli();
 
     // Checkpoint 1
-    test_interrupts();
+    // test_interrupts();
 
     // Throw away contents
     outb(RTC_REG_C, RTC_PORT);
