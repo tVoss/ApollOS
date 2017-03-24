@@ -180,12 +180,14 @@ entry (unsigned long magic, unsigned long addr)
     printf("Done!\n");
 
 
-    printf("Executing Tests... ");
+    printf("Executing Tests...\n");
     if(test_rofs()) {
         printf("ROFS Test Failed!\n");
     }
-    printf("Done!\n");
+    printf("Tests Complete!\n");
 
+
+    list_all_files();
 	/* Execute the first program (`shell') ... */
 
 	/* Spin (nicely, so we don't chew up cycles) */
