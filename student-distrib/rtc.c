@@ -1,10 +1,8 @@
 #include "rtc.h"
-
 #include "interrupt_handlers.h"
 #include "i8259.h"
 #include "lib.h"
 #include "x86_desc.h"
-
 /*
  * init_rtc(void)
  *
@@ -17,23 +15,20 @@
  * SIDE EFFECTS: Initalizes the RTC
  *
  */
+int int_occur = 0;
 void init_rtc() {
     cli();
-
     // Turn RTC on
     outb(RTC_REG_B, RTC_PORT);
     char prev = inb(CMOS_PORT);
     outb(RTC_REG_B, RTC_PORT);
     outb(prev | RTC_ENABLE_INTERRUPT, CMOS_PORT);
-
     // 2Hz initially
     rtc_set_frequency(F2HZ);
-
     // Enable interrupts
     enable_irq(RTC_IRQ_LINE);
     sti();
 }
-
 /*
  * i8259_init(freq)
  *
@@ -54,7 +49,6 @@ void rtc_set_frequency(rtc_freq_t freq) {
     outb((prev & RTC_SET_RATE) | freq, CMOS_PORT);
     sti();
 }
-
 /*
  * rtc_handler(void)
  *
@@ -69,8 +63,8 @@ void rtc_set_frequency(rtc_freq_t freq) {
 void rtc_handler() {
     cli();
 
-    // Checkpoint 1
-    //test_interrupts();
+    test_interrupts();
+    int_occur = 1;
 
     // Throw away contents
     outb(RTC_REG_C, RTC_PORT);
@@ -78,6 +72,108 @@ void rtc_handler() {
 
     // Send eoi to PIC
     send_eoi(RTC_IRQ_LINE);
-
     sti();
+}
+/*
+ * rtc_open(void)
+ *
+ * DESCRIPTION: Opens file
+ *
+ * INPUTS:  none
+ * OUTPUTS: none
+ *
+ * SIDE EFFECTS: opens file
+ *
+ */
+int32_t rtc_open(void)
+{
+    return 0;
+}
+/*
+ * rtc_close(void)
+ *
+ * DESCRIPTION: Closes file
+ *
+ * INPUTS:  none
+ * OUTPUTS: none
+ *
+ * SIDE EFFECTS: closes file
+ *
+ */
+int32_t rtc_close(void)
+{
+    return 0;
+}
+/*
+ * rtc_read(buf, nbytes)
+ *
+ * DESCRIPTION: reads rtc after interupt
+ *
+ * INPUTS:  buf - pointer to buffer
+            nbytes - number of bytes being read
+ * OUTPUTS: none
+ *
+ * SIDE EFFECTS: N/A
+ *
+ */
+int32_t rtc_read(int32_t* buf, int32_t nbytes)
+{
+    while(!int_occur)
+    {
+        //spins
+    }
+    int_occur = 0;
+    return 0;
+}
+/*
+ * rtc_read(buf, nbytes)
+ *
+ * DESCRIPTION: writes frequency of rtc
+ *
+ * INPUTS:  buf - pointer to buffer
+            nbytes - number of bytes being read
+ * OUTPUTS: none
+ *
+ * SIDE EFFECTS: changes frequency
+ *
+ */
+int32_t rtc_write(int32_t* buf, int32_t nbytes)
+{
+    int32_t freq;
+    int8_t r;
+    if (4 != nbytes || buf == NULL)
+    {
+        return -1;
+    }
+    else
+        freq = *buf;
+    outb(RTC_REG_A, RTC_PORT);
+    unsigned char a_old = inb(CMOS_PORT);
+    if(8192 || 4096 || 2048)
+            return -1;
+    switch(freq)
+    {
+        case 1024:
+            r = 0x06;
+        case 512:
+            r = 0x07;
+        case 296:
+            r = 0x08;
+        case 128:
+            r = 0x09;
+        case 64:
+            r = 0x0A;
+        case 32:
+            r = 0x0B;
+        case 16:
+            r = 0x0C;
+        case 8:
+            r = 0x0D;
+        case 4:
+            r = 0x0E;
+        case 2:
+            r = 0x0F;
+    }
+    outb(RTC_REG_A, RTC_PORT);
+    outb((0xF0 & a_old) | r, CMOS_PORT);
 }
