@@ -183,7 +183,7 @@ entry (unsigned long magic, unsigned long addr)
 	//Turn paging on
 	init_paging();
 
-    cp2_tests(0, 0);
+    cp2_test_1();
 
 	/* Execute the first program (`shell') ... */
 

@@ -4,14 +4,16 @@
 #include "lib.h"
 #include "rofs.h"
 
-/* 0: List all files
- *
- */
-void cp2_tests(int test, int param) {
-    clear_terminal();
-    switch (test) {
-        case 0:
-            list_all_files();
-            break;
-    }
+extern void cp2_test_1() {
+    clear();
+    list_all_files();
+}
+extern void cp2_test_2() {
+
+}
+extern void cp2_test_3() {
+
+}
+extern void cp2_test_4() {
+
 }

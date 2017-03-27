@@ -3,16 +3,6 @@
 #include "i8259.h"
 #include "types.h"
 
-#define VIDEO           0xB8000
-#define NUM_COLS        80
-#define NUM_ROWS        25
-#define ATTRIB          0xA
-
-static int screen_x;
-static int screen_y;
-static unsigned short cursor_pos;
-static char* video_mem = (char *)VIDEO;
-
 
 static uint8_t key_scancodes[KEY_STATES][NUM_KEYS] = {
   // no caps and no shift
@@ -68,10 +58,8 @@ static uint8_t keys_state = 0;    // 0 = nothing pressed
 void init_keyboard() {
     cli();
     enable_irq(KEYBOARD_IRQ_LINE);
-    clear_terminal();
+    clear();
     key_buffer_pos = 0;
-    cursor_pos = (unsigned short)(NUM_COLS*screen_y + screen_x);
-    update_cursor_loc(cursor_pos);
     sti();
 }
 
@@ -166,9 +154,7 @@ key_pressed_handler(uint8_t scancode){
     // if ctrl+l is pressed, clear terminal
     if (ctrl_pressed == 1) {
       if (key_scancodes[keys_state][scancode] == 'l'){
-        clear_terminal();
-        cursor_pos = (unsigned short)(NUM_COLS*screen_y + screen_x);
-        update_cursor_loc(cursor_pos);
+        clear();
         key_buffer_pos = 0;
       }
     }
@@ -181,7 +167,7 @@ key_pressed_handler(uint8_t scancode){
           key_buffer[key_buffer_pos] = key_scancodes[keys_state][scancode];
           key_buffer_pos++;
           // display key
-          putc_t(key_scancodes[keys_state][scancode]);
+          putc(key_scancodes[keys_state][scancode]);
         }
     }
 }
@@ -210,19 +196,10 @@ handle_enter() {
     for (i = 0; i < KEY_BUFFER_SIZE; i++){
       key_buffer[i] = '\0';
     }
-    // check if terminal needs to be shifted up
-    if (screen_y == NUM_ROWS - 1){
-      scroll();
-      cursor_pos = (unsigned short)(NUM_COLS*screen_y + screen_x);
-      update_cursor_loc(cursor_pos);
-      key_buffer_pos = 0;
-    } else {
-      screen_x = 0;
-      screen_y++;
-      cursor_pos = (unsigned short)(NUM_COLS*screen_y + screen_x);
-      update_cursor_loc(cursor_pos);
-      key_buffer_pos = 0;
-    }
+
+    do_enter();
+
+    key_buffer_pos = 0;
 }
 
 /*
@@ -242,19 +219,8 @@ handle_backpace() {
       // remove backspaced char from buffer by putting null key at that index
       key_buffer_pos--;
       key_buffer[key_buffer_pos] = '\0';
-      // check if at beginning of line
-      if (screen_x == 0 && screen_y > 0){
-        screen_x = NUM_COLS - 2;
-        screen_y--;
-      } else {
-        screen_x--;
-      }
 
-      *(uint8_t *)(video_mem + ((NUM_COLS*screen_y + screen_x) << 1)) = '\0';
-      *(uint8_t *)(video_mem + ((NUM_COLS*screen_y + screen_x) << 1) + 1) = ATTRIB;
-
-      cursor_pos = (unsigned short)(NUM_COLS*screen_y + screen_x);
-      update_cursor_loc(cursor_pos);
+      do_backspace();
     }
 }
 
@@ -339,116 +305,11 @@ int32_t terminal_write (int32_t fd, uint8_t* buf, int32_t nbytes) {
     for (i = 0; i < nbytes; i++){
       if (buf[i] != '\0'){
         // write the char to the terminal
-        putc_t(buf[i]);
+        putc(buf[i]);
         bytes_written++;
       } else {
         break;
       }
     }
     return bytes_written;
-}
-
-/*
-* void putc_t(uint8_t c);
-*   Description: prints character with consideration of new line after 80 chars
-*   Inputs: uint_8* c = character to print
-*   Return Value: void
-* Function: Output a character to the console
-*/
-void
-putc_t(uint8_t c)
-{
-    // check if reached the bottom of the terminal
-    if ((screen_y == NUM_ROWS - 1) && (screen_x == NUM_COLS - 1)){
-      scroll();
-      cursor_pos = (unsigned short)(NUM_COLS*screen_y + screen_x);
-      update_cursor_loc(cursor_pos);
-      return;
-    }
-    // check if reached the end of the row
-    if (screen_x == NUM_COLS - 1){
-      screen_y++;
-      screen_x = 0;
-      *(uint8_t *)(video_mem + ((NUM_COLS*screen_y + screen_x) << 1)) = c;
-      *(uint8_t *)(video_mem + ((NUM_COLS*screen_y + screen_x) << 1) + 1) = ATTRIB;
-      screen_x++;
-      screen_x %= NUM_COLS;
-      screen_y = (screen_y + (screen_x / NUM_COLS)) % NUM_ROWS;
-    } else {
-      if(c == '\n' || c == '\r') {
-        screen_y++;
-        screen_x=0;
-      } else {
-        *(uint8_t *)(video_mem + ((NUM_COLS*screen_y + screen_x) << 1)) = c;
-        *(uint8_t *)(video_mem + ((NUM_COLS*screen_y + screen_x) << 1) + 1) = ATTRIB;
-        screen_x++;
-        screen_x %= NUM_COLS;
-        screen_y = (screen_y + (screen_x / NUM_COLS)) % NUM_ROWS;
-      }
-    }
-    cursor_pos = (unsigned short)(NUM_COLS*screen_y + screen_x);
-    update_cursor_loc(cursor_pos);
-}
-
-/*
-* void clear_terminal(void)
-*   Inputs: void
-*   Return Value: none
-*   Function: Clears video memory
-*/
-void
-clear_terminal(void)
-{
-    int32_t i;
-    for(i=0; i<NUM_ROWS*NUM_COLS; i++) {
-        *(uint8_t *)(video_mem + (i << 1)) = '\0';
-        *(uint8_t *)(video_mem + (i << 1) + 1) = ATTRIB;
-    }
-    // reset x,y position
-    screen_x = 0;
-    screen_y = 0;
-}
-
-/*
-* void update_cursor_loc(unsigned short pos)
-*   Inputs: pos - x,y position of cursor
-*   Return Value: none
-*   Function: puts cursor in position pos.
-*/
-void update_cursor_loc(unsigned short pos){
-    outb(FB_HIGH_BYTE_COMMAND, FB_COMMAND_PORT);
-    outb(((pos >> 8) & 0x00FF), FB_DATA_PORT);
-    outb(FB_LOW_BYTE_COMMAND, FB_COMMAND_PORT);
-    outb(pos & 0x00FF, FB_DATA_PORT);
-}
-
-
-/*
-* scroll()
-*   Inputs:       none
-*   Return Value: none
-*   Function: shifts the terminal up one line
-*/
-void
-scroll() {
-    int row;
-    int col;
-    int32_t current_line;
-    int32_t scroll_line;
-    // shift the rows up one
-    for (row = 0; row < NUM_ROWS - 1; row++){
-      for (col = 0; col < NUM_COLS; col++){
-        current_line = NUM_COLS*(row+1) + col;
-        scroll_line = NUM_COLS*row + col;
-        *(uint8_t *)(video_mem+(scroll_line<<1)) = *(uint8_t *)(video_mem+(current_line<<1));
-      }
-    }
-    // clear the bottom line
-    for (col = 0; col < NUM_COLS; col++) {
-      scroll_line = NUM_COLS*(NUM_ROWS-1) + col;
-      *(uint8_t *)(video_mem + (scroll_line << 1)) = '\0';
-    }
-    // update the terminal location
-    screen_x = 0;
-    screen_y = NUM_ROWS - 1;
 }

@@ -14,7 +14,9 @@ void fb_move_cursor(unsigned short pos);
 int8_t *itoa(uint32_t value, int8_t* buf, int32_t radix);
 int8_t *strrev(int8_t* s);
 uint32_t strlen(const int8_t* s);
+
 void clear(void);
+void scroll(void);
 
 void* memset(void* s, int32_t c, uint32_t n);
 void* memset_word(void* s, int32_t c, uint32_t n);
@@ -31,6 +33,16 @@ int32_t safe_strncpy(int8_t* dest, const int8_t* src, int32_t n);
 
 /* Declare test function */
 void test_interrupts();
+
+/* Screen functions */
+/* update cursor location */
+int get_screen_x();
+int get_screen_y();
+void set_screen_pos(int x, int y);
+void update_cursor_loc(int x, int y);
+
+void do_enter();
+void do_backspace();
 
 /* Port read functions */
 /* Inb reads a byte and returns its value as a zero-extended 32-bit

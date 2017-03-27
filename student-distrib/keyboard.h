@@ -25,13 +25,6 @@
 
 #define RELEASE(key)  	(key|0x80)  // key release code
 
-/* The I/O ports */
-#define FB_COMMAND_PORT         0x3D4
-#define FB_DATA_PORT            0x3D5
-/* The I/O port commands */
-#define FB_HIGH_BYTE_COMMAND    14
-#define FB_LOW_BYTE_COMMAND     15
-
 /* Initialize the keyboard */
 extern void init_keyboard();
 /* Process interrupts */
@@ -48,11 +41,5 @@ void handle_enter();
 int32_t terminal_open();
 int32_t terminal_close();
 int32_t terminal_read (int32_t fd, uint8_t* buf, int32_t nbytes);
-/* clear screen */
-void clear_terminal();
-/* update cursor location */
-void update_cursor_loc(unsigned short pos);
-/* shift the terminal one line up */
-void scroll();
 
 #endif

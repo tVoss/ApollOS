@@ -3,10 +3,18 @@
  */
 
 #include "lib.h"
+
 #define VIDEO 					0xB8000
 #define NUM_COLS 				80
 #define NUM_ROWS 				25
-#define ATTRIB 					0x7
+#define ATTRIB 					0xA
+
+/* The I/O ports */
+#define FB_COMMAND_PORT         0x3D4
+#define FB_DATA_PORT            0x3D5
+/* The I/O port commands */
+#define FB_HIGH_BYTE_COMMAND    14
+#define FB_LOW_BYTE_COMMAND     15
 
 static int screen_x;
 static int screen_y;
@@ -27,6 +35,38 @@ clear(void)
         *(uint8_t *)(video_mem + (i << 1)) = ' ';
         *(uint8_t *)(video_mem + (i << 1) + 1) = ATTRIB;
     }
+    set_screen_pos(0, 0);
+    update_cursor_loc(0, 0);
+}
+
+/*
+* scroll()
+*   Inputs:       none
+*   Return Value: none
+*   Function: shifts the terminal up one line
+*/
+void
+scroll() {
+    int row;
+    int col;
+    int32_t current_line;
+    int32_t scroll_line;
+    // shift the rows up one
+    for (row = 0; row < NUM_ROWS - 1; row++){
+      for (col = 0; col < NUM_COLS; col++){
+        current_line = NUM_COLS*(row+1) + col;
+        scroll_line = NUM_COLS*row + col;
+        *(uint8_t *)(video_mem+(scroll_line<<1)) = *(uint8_t *)(video_mem+(current_line<<1));
+      }
+    }
+    // clear the bottom line
+    for (col = 0; col < NUM_COLS; col++) {
+      scroll_line = NUM_COLS*(NUM_ROWS-1) + col;
+      *(uint8_t *)(video_mem + (scroll_line << 1)) = '\0';
+    }
+    // update the terminal location
+    screen_x = 0;
+    screen_y = NUM_ROWS - 1;
 }
 
 /* Standard printf().
@@ -162,7 +202,7 @@ format_char_switch:
 * int32_t puts(int8_t* s);
 *   Inputs: int_8* s = pointer to a string of characters
 *   Return Value: Number of bytes written
-*	Function: Output a string to the console 
+*	Function: Output a string to the console
 */
 
 int32_t
@@ -181,7 +221,7 @@ puts(int8_t* s)
 * void putc(uint8_t c);
 *   Inputs: uint_8* c = character to print
 *   Return Value: void
-*	Function: Output a character to the console 
+*	Function: Output a character to the console
 */
 
 void
@@ -197,6 +237,8 @@ putc(uint8_t c)
         screen_x %= NUM_COLS;
         screen_y = (screen_y + (screen_x / NUM_COLS)) % NUM_ROWS;
     }
+
+    update_cursor_loc(screen_x, screen_y);
 }
 
 /*
@@ -475,11 +517,11 @@ memmove(void* dest, const void* src, uint32_t n)
 *   Inputs: const int8_t* s1 = first string to compare
 *			const int8_t* s2 = second string to compare
 *			uint32_t n = number of bytes to compare
-*	Return Value: A zero value indicates that the characters compared 
+*	Return Value: A zero value indicates that the characters compared
 *					in both strings form the same string.
-*				A value greater than zero indicates that the first 
-*					character that does not match has a greater value 
-*					in str1 than in str2; And a value less than zero 
+*				A value greater than zero indicates that the first
+*					character that does not match has a greater value
+*					in str1 than in str2; And a value less than zero
 *					indicates the opposite.
 *	Function: compares string 1 and string 2 for equality
 */
@@ -565,4 +607,60 @@ test_interrupts(void)
 	for (i=0; i < NUM_ROWS*NUM_COLS; i++) {
 		video_mem[i<<1]++;
 	}
+}
+
+/*
+* void sor_loc(unsigned short pos)
+*   Inputs: pos - x,y position of cursor
+*   Return Value: none
+*   Function: puts cursor in position pos.
+*/
+void update_cursor_loc(int x, int y) {
+    unsigned short pos = (unsigned short)(NUM_COLS * y + x);
+
+    outb(FB_HIGH_BYTE_COMMAND, FB_COMMAND_PORT);
+    outb(((pos >> 8) & 0x00FF), FB_DATA_PORT);
+    outb(FB_LOW_BYTE_COMMAND, FB_COMMAND_PORT);
+    outb(pos & 0x00FF, FB_DATA_PORT);
+}
+
+int get_screen_x() {
+    return screen_x;
+}
+
+int get_screen_y() {
+    return screen_y;
+}
+
+void set_screen_pos(int x, int y) {
+    screen_x = x;
+    screen_y = y;
+}
+
+void do_enter() {
+    // check if terminal needs to be shifted up
+    if (screen_y == NUM_ROWS - 1){
+      scroll();
+    } else {
+      screen_y++;
+    }
+
+    screen_x = 0;
+
+    update_cursor_loc(screen_x, screen_y);
+}
+
+void do_backspace() {
+    // check if at beginning of line
+    if (screen_x == 0 && screen_y > 0){
+      screen_x = NUM_COLS - 2;
+      screen_y--;
+    } else {
+      screen_x--;
+    }
+
+    *(uint8_t *)(VIDEO + ((NUM_COLS*screen_y + screen_x) << 1)) = '\0';
+    *(uint8_t *)(VIDEO + ((NUM_COLS*screen_y + screen_x) << 1) + 1) = ATTRIB;
+
+    update_cursor_loc(screen_x, screen_y);
 }
