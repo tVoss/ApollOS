@@ -39,11 +39,11 @@ extern void rtc_set_frequency(rtc_freq_t freq);
 extern void rtc_handler();
 /* Opens file */
 extern int32_t rtc_open(void);
-/* Closes file*/
+/* Closes file */
 extern int32_t rtc_close(void);
-/* Reads rtc after interrupt*/
+/* Reads rtc after interrupt */
 extern int32_t rtc_read(int32_t* buf, int32_t nbytes);
-/* Writes frequency of rtc*/
+/* Writes frequency of rtc */
 extern int32_t rtc_write(int32_t* buf, int32_t nbytes);
 
 #endif
