@@ -9,6 +9,17 @@ boot_block_t *boot_block;
 inode_t *inodes;
 data_block_t *data_blocks;
 
+/*
+ * init_rofs(base)
+ *
+ * DESCRIPTION: Sets up the file system for reading
+ *
+ * INPUTS: 	base - the address of the start of the fs
+ * OUTPUTS: none
+ *
+ * SIDE EFFECTS: Sets pointers to fs objects
+ *
+ */
 void init_rofs(void *base) {
     // Size is used multiple times
     uint32_t boot_block_size = sizeof(boot_block_t);
@@ -21,6 +32,17 @@ void init_rofs(void *base) {
     data_blocks = (data_block_t *) (base + boot_block_size + boot_block->num_inodes * sizeof(inode_t));
 }
 
+/*
+ * list_all_files()
+ *
+ * DESCRIPTION: Testing function that lists all the files in the fs
+ *
+ * INPUTS: 	none
+ * OUTPUTS: none
+ *
+ * SIDE EFFECTS: Prints file names, types, and size to screen
+ *
+ */
 void list_all_files() {
     int i;
     int8_t buf[33];
@@ -35,6 +57,17 @@ void list_all_files() {
     }
 }
 
+/*
+ * read_dentry_by_name(fname, dentry)
+ *
+ * DESCRIPTION: Attempts to read a directory entry on the file system by name
+ *
+ * INPUTS: 	fname - the name of the file
+ * OUTPUTS: dentry - the populated directory entry
+ *
+ * RETURNS: -1 on error, 0 otherwise
+ * SIDE EFFECTS: none
+ */
 int32_t read_dentry_by_name(const int8_t *fname, dentry_t *dentry) {
     int i;
     for (i = 0; i < boot_block->num_dir_entries; i++) {
@@ -54,6 +87,17 @@ int32_t read_dentry_by_name(const int8_t *fname, dentry_t *dentry) {
     return -1;
 }
 
+/*
+ * read_dentry_by_index(index, dentry)
+ *
+ * DESCRIPTION: Attempts to read a directory entry on the file system by index
+ *
+ * INPUTS: 	index - the index of the file
+ * OUTPUTS: dentry - the populated directory entry
+ *
+ * RETURNS: -1 on error, 0 otherwise
+ * SIDE EFFECTS: none
+ */
 int32_t read_dentry_by_index(uint32_t index, dentry_t *dentry) {
     if (index >= boot_block->num_dir_entries) {
         // Invalid index
@@ -67,6 +111,19 @@ int32_t read_dentry_by_index(uint32_t index, dentry_t *dentry) {
     return 0;
 }
 
+/*
+ * read_data(inode, offset, buf, length)
+ *
+ * DESCRIPTION: Writes the data contained by the inode to a buffer
+ *
+ * INPUTS: 	inode - the inode index that contains data information
+ *          offset - how many bytes from the start of the file to start reading
+ *          length - the max amount of bytes to read
+ * OUTPUTS: buf - A buffer where the data is placed
+ *
+ * RETURNS: -1 on error, otherwise the amount of bytes read
+ * SIDE EFFECTS: none
+ */
 int32_t read_data(uint32_t inode, uint32_t offset, uint8_t *buf, uint32_t length) {
     if (inode >= boot_block->num_inodes) {
         // Invalid index

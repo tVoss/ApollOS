@@ -30,7 +30,7 @@ void init_rtc() {
     sti();
 }
 /*
- * i8259_init(freq)
+ * rtc_set_frequency(freq)
  *
  * DESCRIPTION: Changes te frequency of the RTC to one
  *              of 14 valid options (0Hz - 8192Hz)
