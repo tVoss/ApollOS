@@ -10,8 +10,6 @@
 
 #include "keyboard.h"
 #include "rtc.h"
-
-//added by Joey
 #include "paging.h"
 
 /* Macros. */

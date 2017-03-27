@@ -37,5 +37,13 @@ extern void init_rtc();
 extern void rtc_set_frequency(rtc_freq_t freq);
 /* Handle clock interrupts */
 extern void rtc_handler();
+/* Opens file */
+extern int32_t rtc_open(void);
+/* Closes file*/
+extern int32_t rtc_close(void);
+/* Reads rtc after interrupt*/
+extern int32_t rtc_read(int32_t* buf, int32_t nbytes);
+/* Writes frequency of rtc*/
+extern int32_t rtc_write(int32_t* buf, int32_t nbytes);
 
 #endif
