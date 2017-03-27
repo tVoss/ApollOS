@@ -2,6 +2,9 @@
 
 #include "lib.h"
 
+// FOR TESTING
+#include "keyboard.h"
+
 boot_block_t *boot_block;
 inode_t *inodes;
 data_block_t *data_blocks;
@@ -24,7 +27,11 @@ void list_all_files() {
     printf("Listing all files in filesys_img:\n");
     for (i = 0; i < boot_block->num_dir_entries; i++) {
         strncpy(buf, boot_block->dentries[i].file_name, 32);
-        printf("%d: %s\n", i, buf);
+        buf[32] = 0;
+        printf("file_name: %s, file_type: %d, file_size: %d\n",
+            buf,
+            boot_block->dentries[i].file_type,
+            inodes[boot_block->dentries[i].inode_num].length);
     }
 }
 

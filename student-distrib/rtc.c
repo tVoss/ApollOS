@@ -63,7 +63,6 @@ void rtc_set_frequency(rtc_freq_t freq) {
 void rtc_handler() {
     cli();
 
-    test_interrupts();
     int_occur = 1;
 
     // Throw away contents

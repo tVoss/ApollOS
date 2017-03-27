@@ -183,14 +183,8 @@ entry (unsigned long magic, unsigned long addr)
 	//Turn paging on
 	init_paging();
 
-    printf("Executing Tests...\n");
-    if(test_rofs()) {
-        printf("ROFS Test Failed!\n");
-    }
-    printf("Tests Complete!\n");
+    cp2_tests(0, 0);
 
-
-    list_all_files();
 	/* Execute the first program (`shell') ... */
 
 	/* Spin (nicely, so we don't chew up cycles) */

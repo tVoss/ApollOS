@@ -1,26 +1,17 @@
 #include "tests.h"
 
+#include "keyboard.h"
 #include "lib.h"
 #include "rofs.h"
 
-int test_rofs() {
-    int error = 0;
-
-    dentry_t dentry;
-    read_dentry_by_index(0, &dentry);
-
-    // Set error if file name is wrong
-    error |= dentry.file_name[0] != '.';
-
-    read_dentry_by_name("frame0.txt", &dentry);
-
-    error |= dentry.file_name[0] != 'f';
-
-    uint8_t data[188];
-    read_data(dentry.inode_num, 0, data, 188);
-    data[187] = 0;
-
-    printf("Data from frame0.txt:\n%s\n", data);
-
-    return error;
+/* 0: List all files
+ *
+ */
+void cp2_tests(int test, int param) {
+    clear_terminal();
+    switch (test) {
+        case 0:
+            list_all_files();
+            break;
+    }
 }

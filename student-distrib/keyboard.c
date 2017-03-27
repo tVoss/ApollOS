@@ -18,22 +18,22 @@ static uint8_t key_scancodes[KEY_STATES][NUM_KEYS] = {
   // no caps and no shift
   {'\0', '\0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '0', '-', '=', '\0', '\0',
    'q', 'w', 'e', 'r', 't', 'y', 'u', 'i', 'o', 'p', '[', ']', '\0', '\0', 'a', 's',
-   'd', 'f', 'g', 'h', 'j', 'k', 'l' , ';', '\'', '`', '\0', '\\', 'z', 'x', 'c', 'v', 
+   'd', 'f', 'g', 'h', 'j', 'k', 'l' , ';', '\'', '`', '\0', '\\', 'z', 'x', 'c', 'v',
    'b', 'n', 'm',',', '.', '/', '\0', '*', '\0', ' ', '\0'},
   // no caps and yes shift
   {'\0', '\0', '!', '@', '#', '$', '%', '^', '&', '*', '(', ')', '_', '+', '\0', '\0',
    'Q', 'W', 'E', 'R', 'T', 'Y', 'U', 'I', 'O', 'P', '{', '}', '\0', '\0', 'A', 'S',
-   'D', 'F', 'G', 'H', 'J', 'K', 'L' , ':', '"', '~', '\0', '|', 'Z', 'X', 'C', 'V', 
+   'D', 'F', 'G', 'H', 'J', 'K', 'L' , ':', '"', '~', '\0', '|', 'Z', 'X', 'C', 'V',
    'B', 'N', 'M', '<', '>', '?', '\0', '*', '\0', ' ', '\0'},
   // yes caps and no shift
   {'\0', '\0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '0', '-', '=', '\0', '\0',
    'Q', 'W', 'E', 'R', 'T', 'Y', 'U', 'I', 'O', 'P', '[', ']', '\0', '\0', 'A', 'S',
-   'D', 'F', 'G', 'H', 'J', 'K', 'L' , ';', '\'', '`', '\0', '\\', 'Z', 'X', 'C', 'V', 
+   'D', 'F', 'G', 'H', 'J', 'K', 'L' , ';', '\'', '`', '\0', '\\', 'Z', 'X', 'C', 'V',
    'B', 'N', 'M', ',', '.', '/', '\0', '*', '\0', ' ', '\0'},
   // yes caps and yes shift
   {'\0', '\0', '!', '@', '#', '$', '%', '^', '&', '*', '(', ')', '_', '+', '\0', '\0',
    'q', 'w', 'e', 'r', 't', 'y', 'u', 'i', 'o', 'p', '{', '}', '\0', '\0', 'a', 's',
-   'd', 'f', 'g', 'h', 'j', 'k', 'l' , ':', '"', '~', '\0', '\\', 'z', 'x', 'c', 'v', 
+   'd', 'f', 'g', 'h', 'j', 'k', 'l' , ':', '"', '~', '\0', '\\', 'z', 'x', 'c', 'v',
    'b', 'n', 'm', '<', '>', '?', '\0', '*', '\0', ' ', '\0'}
 };
 
@@ -68,7 +68,7 @@ static uint8_t keys_state = 0;    // 0 = nothing pressed
 void init_keyboard() {
     cli();
     enable_irq(KEYBOARD_IRQ_LINE);
-    clear_terminal(); 
+    clear_terminal();
     key_buffer_pos = 0;
     cursor_pos = (unsigned short)(NUM_COLS*screen_y + screen_x);
     update_cursor_loc(cursor_pos);
@@ -140,7 +140,7 @@ keyboard_handler()
         default:
           key_pressed_handler(scancode);
           break;
-      } 
+      }
     }
 
     send_eoi(KEYBOARD_IRQ_LINE);
@@ -236,11 +236,11 @@ handle_enter() {
  *               updates key buffer.
  *
  */
-void 
+void
 handle_backpace() {
     if (key_buffer_pos > 0){
       // remove backspaced char from buffer by putting null key at that index
-      key_buffer_pos--;                                 
+      key_buffer_pos--;
       key_buffer[key_buffer_pos] = '\0';
       // check if at beginning of line
       if (screen_x == 0 && screen_y > 0){
@@ -269,7 +269,7 @@ handle_backpace() {
  * SIDE EFFECTS: none
  *
  */
-int32_t 
+int32_t
 terminal_open(){
   return 0;
 }
@@ -285,7 +285,7 @@ terminal_open(){
  * SIDE EFFECTS: none
  *
  */
-int32_t 
+int32_t
 terminal_close(){
   return 0;
 }
@@ -305,7 +305,7 @@ terminal_close(){
  *               on one line.
  *
  */
-int32_t 
+int32_t
 terminal_read (int32_t fd, uint8_t* buf, int32_t nbytes) {
     int32_t bytes_read = 0;
     int32_t i = 0;
@@ -353,7 +353,7 @@ int32_t terminal_write (int32_t fd, uint8_t* buf, int32_t nbytes) {
 *   Description: prints character with consideration of new line after 80 chars
 *   Inputs: uint_8* c = character to print
 *   Return Value: void
-* Function: Output a character to the console 
+* Function: Output a character to the console
 */
 void
 putc_t(uint8_t c)
@@ -429,7 +429,7 @@ void update_cursor_loc(unsigned short pos){
 *   Return Value: none
 *   Function: shifts the terminal up one line
 */
-void 
+void
 scroll() {
     int row;
     int col;
@@ -452,4 +452,3 @@ scroll() {
     screen_x = 0;
     screen_y = NUM_ROWS - 1;
 }
-
