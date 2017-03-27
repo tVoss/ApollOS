@@ -59,7 +59,6 @@ static uint8_t keys_state = 0;    // 0 = nothing pressed
 void init_keyboard() {
     cli();
     enable_irq(KEYBOARD_IRQ_LINE);
-    clear();
     key_buffer_pos = 0;
     sti();
 }
