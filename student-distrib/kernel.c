@@ -183,7 +183,9 @@ entry (unsigned long magic, unsigned long addr)
 	//Turn paging on
 	init_paging();
 
-    cp2_test_1();
+    //cp2_test_1();
+    //cp2_test_2("frame0.txt");
+    cp2_test_3(4);
 
 	/* Execute the first program (`shell') ... */
 

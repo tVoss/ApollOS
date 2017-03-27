@@ -3,6 +3,7 @@
 #include "i8259.h"
 #include "types.h"
 
+#include "tests.h"
 
 static uint8_t key_scancodes[KEY_STATES][NUM_KEYS] = {
   // no caps and no shift
@@ -156,6 +157,25 @@ key_pressed_handler(uint8_t scancode){
       if (key_scancodes[keys_state][scancode] == 'l'){
         clear();
         key_buffer_pos = 0;
+      }
+
+
+      static int index = 0;
+
+      // CHECKPOINT 2 TESTS
+      switch (key_scancodes[keys_state][scancode]) {
+          case '1':
+            cp2_test_1();
+            break;
+          case '2':
+            cp2_test_2("frame0.txt");
+            break;
+          case '3':
+            cp2_test_3(index);
+            index = (index + 1) % 17;
+            break;
+          default:
+            break;
       }
     }
     else if (scancode < NUM_KEYS) {
