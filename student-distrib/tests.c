@@ -43,6 +43,8 @@ extern void cp2_test_3(int index) {
     strncpy(name, dentry.file_name, 32);
     printf("file_name: %s\n", name);
 }
-extern void cp2_test_4() {
 
+extern void cp2_test_4(rtc_freq_t freq) {
+    clear();
+    rtc_set_frequency(freq);
 }

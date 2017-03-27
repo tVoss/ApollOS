@@ -23,8 +23,8 @@ void init_rtc() {
     char prev = inb(CMOS_PORT);
     outb(RTC_REG_B, RTC_PORT);
     outb(prev | RTC_ENABLE_INTERRUPT, CMOS_PORT);
-    // 2Hz initially
-    rtc_set_frequency(F2HZ);
+    // 0Hz initially -- for testing
+    rtc_set_frequency(F0HZ);
     // Enable interrupts
     enable_irq(RTC_IRQ_LINE);
     sti();
@@ -64,6 +64,9 @@ void rtc_handler() {
     cli();
 
     int_occur = 1;
+
+    // Checkpoint 2
+    putc('1');
 
     // Throw away contents
     outb(RTC_REG_C, RTC_PORT);

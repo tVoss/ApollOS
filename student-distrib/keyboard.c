@@ -160,6 +160,7 @@ key_pressed_handler(uint8_t scancode){
 
 
       static int index = 0;
+      static int freq = 0;
 
       // CHECKPOINT 2 TESTS
       switch (key_scancodes[keys_state][scancode]) {
@@ -172,6 +173,13 @@ key_pressed_handler(uint8_t scancode){
           case '3':
             cp2_test_3(index);
             index = (index + 1) % 17;
+            break;
+          case '4':
+            cp2_test_4(15 - freq);
+            freq = (freq + 1) % 13;
+            break;
+          case '5':
+            cp2_test_4(0);
             break;
           default:
             break;

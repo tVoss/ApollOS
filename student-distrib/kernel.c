@@ -160,17 +160,17 @@ entry (unsigned long magic, unsigned long addr)
 	/* Init the PIC */
     printf("Initing PIC... ");
 	i8259_init();
-    //printf("Done!\n");
+    printf("Done!\n");
 
 	/* Initialize devices, memory, filesystem, enable device interrupts on the
 	 * PIC, any other initialization stuff... */
     printf("Initing RTC... ");
     init_rtc();
-    //printf("Done!\n");
+    printf("Done!\n");
 
     printf("Initing Keyboard... ");
     init_keyboard();
-    //printf("Done!\n");
+    printf("Done!\n");
 
 	/* Enable interrupts */
 	/* Do not enable the following until after you have set up your
@@ -183,10 +183,7 @@ entry (unsigned long magic, unsigned long addr)
 	//Turn paging on
 	init_paging();
 
-    //cp2_test_1();
-    //cp2_test_2("frame0.txt");
-    cp2_test_3(4);
-
+    printf("Ready to test!\nType text into the terminal or press Ctrl+[1,2,3,4,5]\n");
 	/* Execute the first program (`shell') ... */
 
 	/* Spin (nicely, so we don't chew up cycles) */
