@@ -2,6 +2,7 @@
 #define RTC_H_
 
 #include "idt.h"
+#include "lib.h"
 
 #define RTC_PORT    0x70
 #define CMOS_PORT   0x71
@@ -38,12 +39,12 @@ extern void rtc_set_frequency(rtc_freq_t freq);
 /* Handle clock interrupts */
 extern void rtc_handler();
 /* Opens file */
-extern int32_t rtc_open(void);
+extern int32_t rtc_open();
 /* Closes file */
-extern int32_t rtc_close(void);
+extern int32_t rtc_close();
 /* Reads rtc after interrupt */
-extern int32_t rtc_read(int32_t* buf, int32_t nbytes);
+extern int32_t rtc_read(int32_t *buf, int32_t nbytes);
 /* Writes frequency of rtc */
-extern int32_t rtc_write(int32_t* buf, int32_t nbytes);
+extern int32_t rtc_write(int32_t *buf, int32_t nbytes);
 
 #endif
