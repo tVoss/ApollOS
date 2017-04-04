@@ -25,21 +25,25 @@
 
 #define RELEASE(key)  	(key|0x80)  // key release code
 
+/* key buffer */
+extern volatile uint8_t key_buffer[KEY_BUFFER_SIZE];
+/* position in the key buffer */
+extern volatile uint32_t key_buffer_pos;
+/* if enter has been pressed */
+extern volatile uint8_t enter_pressed;
+
 /* Initialize the keyboard */
-extern void init_keyboard();
+void init_keyboard();
 /* Process interrupts */
-extern void handle_keyboard();
+void handle_keyboard();
 /* Process key pressed */
-extern void key_pressed_handler(uint8_t scancode);
+void key_pressed_handler(uint8_t scancode);
 /* print character with new line consideration*/
 void putc_t(uint8_t c);
 /* handles backspace pressed */
 void handle_backpace();
 /* handles enter pressed */
 void handle_enter();
-/* terminal driver system calls */
-int32_t terminal_open();
-int32_t terminal_close();
-int32_t terminal_read (int32_t fd, uint8_t* buf, int32_t nbytes);
+
 
 #endif
