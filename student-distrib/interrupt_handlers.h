@@ -7,4 +7,7 @@ void handle_rtc();
 /* Handler for Keyboard interrupts */
 void handle_keyboard();
 
+/* Handler for Syscalls */
+void handle_syscall();
+
 #endif

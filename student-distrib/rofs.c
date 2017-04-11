@@ -48,7 +48,7 @@ void list_all_files() {
     int8_t buf[33];
     printf("Listing all files in filesys_img:\n");
     for (i = 0; i < boot_block->num_dir_entries; i++) {
-        strncpy(buf, boot_block->dentries[i].file_name, 32);
+        strncpy(buf, boot_block->dentries[i].file_name, FILE_NAME_LENGTH);
         buf[32] = 0;
         printf("file_name: %s, file_type: %d, file_size: %d\n",
             buf,
@@ -72,7 +72,7 @@ int32_t read_dentry_by_name(const int8_t *fname, dentry_t *dentry) {
     int i;
     for (i = 0; i < boot_block->num_dir_entries; i++) {
         // If file names aren't equal, continue looking
-        if (strncmp(fname, boot_block->dentries[i].file_name, 32)) {
+        if (strncmp(fname, boot_block->dentries[i].file_name, FILE_NAME_LENGTH)) {
             continue;
         }
 
@@ -143,8 +143,8 @@ int32_t read_data(uint32_t inode, uint32_t offset, uint8_t *buf, uint32_t length
 
     int i;
     for (i = 0; i < length; i++) {
-        int block = (i + offset) / 4096;
-        int block_offset = (i + offset) % 4096;
+        int block = (i + offset) >> 12;             // >> 12 ~= / 4096
+        int block_offset = (i + offset) & 0xFFF;    // & 0xFFF ~= % 4096
         buf[i] = data_blocks[node->data_block_num[block]][block_offset];
     }
 

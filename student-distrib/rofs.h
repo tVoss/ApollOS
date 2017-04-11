@@ -3,8 +3,16 @@
 
 #include "types.h"
 
+#define FILE_NAME_LENGTH 32
+
+typedef enum file_type {
+    rtc = 0,
+    dir = 1,
+    file = 2
+} file_type_t;
+
 typedef struct dentry {
-    int8_t file_name[32];
+    int8_t file_name[FILE_NAME_LENGTH];
     uint32_t file_type;
     uint32_t inode_num;
     uint8_t reserved[24];
@@ -25,11 +33,11 @@ typedef struct inode {
 
 typedef uint8_t data_block_t[4096];
 
-extern void init_rofs(void *base);
+void init_rofs(void *base);
 // Helper function before ls is implemented
-extern void list_all_files();
-extern int32_t read_dentry_by_name(const int8_t *fname, dentry_t *dentry);
-extern int32_t read_dentry_by_index(uint32_t index, dentry_t *dentry);
-extern int32_t read_data(uint32_t inode, uint32_t offset, uint8_t *buf, uint32_t length);
+void list_all_files();
+int32_t read_dentry_by_name(const int8_t *fname, dentry_t *dentry);
+int32_t read_dentry_by_index(uint32_t index, dentry_t *dentry);
+int32_t read_data(uint32_t inode, uint32_t offset, uint8_t *buf, uint32_t length);
 
 #endif
