@@ -18,14 +18,14 @@
 #define MAGIC2 0x4C
 #define MAGIC3 0x46
 
-#define USER_STACK 0x83FFFFC
-#define EIGHT_KB_BLOCK 0x2000
-#define FOUR_MB_BLOCK 0x400000
-#define PROCESS_SIZE 4096
+#define USER_STACK      0x83FFFFC
+#define EIGHT_KB_BLOCK  0x2000
+#define FOUR_MB_BLOCK   0x400000
+#define PROCESS_SIZE    4096
 
-#define VIRTUAL_START 0x08000000
-#define PHYSICAL_START 0x800000
-#define EXECUTE_START 0x08048000
+#define VIRTUAL_START  0x08000000
+#define PHYSICAL_START 0x00800000
+#define EXECUTE_START  0x08048000
 
 #define PCB_MASK 0x00FFE000
 
@@ -47,7 +47,7 @@ typedef struct pcb {
     struct pcb *parent;
     file_t files[MAX_FILES];
     uint8_t pid;
-    int8_t *args;
+    int8_t args[MAX_ARGS_LENGTH];
     int32_t esp;
     int32_t ebp;
 } pcb_t;
@@ -77,6 +77,8 @@ int32_t fail();
 pcb_t *create_pcb();
 
 pcb_t *get_current_pcb();
+
+pcb_t *get_pcb(uint32_t pid);
 
 
 #endif

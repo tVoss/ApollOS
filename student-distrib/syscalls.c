@@ -51,6 +51,8 @@ int32_t halt(uint8_t status) {
 }
 
 int32_t execute(const int8_t *command) {
+    cli();
+
     uint32_t esp_temp;
     uint32_t ebp_temp;
     uint32_t com_start;
@@ -63,7 +65,7 @@ int32_t execute(const int8_t *command) {
 
     // Copy over esp and esb
     asm volatile("movl %%esp,%0 \n\t"
-                 "movl %%ebp,%0 \n\t"
+                 "movl %%ebp,%1 \n\t"
                  : "=r"(esp_temp), "=r"(ebp_temp)
                  );
 
@@ -106,7 +108,6 @@ int32_t execute(const int8_t *command) {
 
     // Map memory and move program code to execution start
     remap(VIRTUAL_START, PHYSICAL_START + pcb_new->pid * FOUR_MB_BLOCK);
-    //memcpy((uint8_t *)EXECUTE_START, buffer, PROCESS_SIZE);
     read_data(dentry.inode_num, 0, (uint8_t *) EXECUTE_START, inodes[dentry.inode_num].length);
 
     // Set up flags
@@ -117,36 +118,41 @@ int32_t execute(const int8_t *command) {
     tss.ss0 = KERNEL_DS;
     tss.esp0 = PHYSICAL_START - pcb_new->pid * EIGHT_KB_BLOCK - MAGIC_SIZE;
 
-    pcb_new->parent->esp = esp_temp;
-    pcb_new->parent->ebp = ebp_temp;
-    pcb_new->args = arg_buf;
+    //pcb_new->parent->esp = esp_temp;
+    //pcb_new->parent->ebp = ebp_temp;
+    strncpy(pcb_new->args, arg_buf, MAX_ARGS_LENGTH);
 
     // Not sure
     if (strncmp("shell", (int8_t*)com_buf, COMMAND_SIZE) != 0) {
         keyboard_flag = 1;
     }
 
+    sti();
+
     // Context switch
-    asm volatile ("xorl %%eax, %%eax \n\t" //clear eax
-                  "movw $0x2B, %%ax \n\t"
-                  "movw %%ax, %%ds \n\t"
-                  "pushl %3 \n\t" //push SS
-                  "pushl %4 \n\t" //push USER_STACK
-                  "pushf \n\t" //push flags
-                  "popl %%eax \n\t"
-                  "orl  $0x200, %%eax \n\t"
-                  "pushl %%eax \n\t"
-                  "pushl %2 \n\t" //push CS
-                  "pushl %1 \n\t" //push EIP
-                  "IRET \n\t"
-                  "HALT_RET_LABEL:  \n\t"
-                  "movl %%eax, %0"
-                  : "=r"(temp_ret)
-                  :"r"(temp_eip), "r"(temp_cs), "r"(temp_ds), "r"(USER_STACK)
-                  :"%eax"
+    asm volatile (
+        "cli\n\t"
+        "movw $0x2B, %%ax\n\t"
+        "movw %%ax, %%ds\n\t"
+        "movl $0x83FFFFC, %%eax\n\t"
+        "pushl $0x2B\n\t"
+        "pushl %%eax\n\t"
+        "pushfl\n\t"
+        "popl %%edx\n\t"
+        "orl $0x200, %%edx\n\t"
+        "pushl %%edx\n\t"
+        "pushl $0x23\n\t"
+        "pushl %0\n\t"
+        "iret\n\t"
+        "HALT_RET_LABEL:\n\t"
+        "leave\n\t"
+        "ret\n\t"
+        : // No outputs
+        : "r" (com_start)
+        : "%eax", "%edx"
     );
 
-    return temp_ret;
+    return 0;
 }
 
 int32_t read(int32_t fd, void *buf, int32_t nbytes) {
@@ -300,7 +306,7 @@ pcb_t *create_pcb() {
         return NULL;
     }
 
-    pcb_t *pcb = (pcb_t *) (PHYSICAL_START - (EIGHT_KB_BLOCK * (pid + 1)));
+    pcb_t *pcb = get_pcb(pid);
     pcb->pid = pid;
 
     pcb->parent = current_pcb;
@@ -322,10 +328,16 @@ pcb_t *create_pcb() {
 }
 
 pcb_t *get_current_pcb() {
-    int32_t esp;
-    asm volatile (
-        "mov %%ESP, %0"
-        : "=c"(esp)
+    pcb_t *pcb;
+    asm volatile(
+        "andl %%esp, %%eax\n\t"
+        : "=a" (pcb)
+        : "a" (PCB_MASK)
+        : "cc"
     );
-    return (pcb_t *)(esp & PCB_MASK);
+    return pcb;
+}
+
+pcb_t *get_pcb(uint32_t pid) {
+    return (pcb_t *)(PHYSICAL_START - EIGHT_KB_BLOCK * (pid + 1));
 }

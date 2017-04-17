@@ -29,9 +29,9 @@ handle_syscall:
 
     pushal          # Push all registers to stack
 
-    pushl %ebx      # Manually push arguments
+    pushl %edx      # Manually push arguments
     pushl %ecx
-    pushl %edx
+    pushl %ebx
 
     sti             # Call function with interrupts on
     call *syscalls(, %eax, 4)

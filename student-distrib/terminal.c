@@ -50,6 +50,11 @@ int32_t terminal_close(int32_t fd) {
  */
 int32_t terminal_read (int32_t fd, void *buf, int32_t nbytes) {
 
+    while (!enter_pressed) {
+        // Wait
+    }
+
+    enter_pressed = 0;
 
     int8_t *byte_buf = (int8_t *) buf;
 
@@ -61,8 +66,6 @@ int32_t terminal_read (int32_t fd, void *buf, int32_t nbytes) {
       bytes_read++;
       i++;
     }
-    // resest keyboard enter flag
-    enter_pressed = 0;
 
     return bytes_read;
 }
