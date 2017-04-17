@@ -52,7 +52,7 @@ int32_t halt(uint8_t status) {
 
 int32_t execute(const int8_t *command) {
     uint32_t esp_temp;
-    uint32_t esb_temp;
+    uint32_t ebp_temp;
     uint32_t com_start;
     int8_t com_buf[COMMAND_SIZE];
     int8_t arg_buf[COMMAND_SIZE];
@@ -64,7 +64,7 @@ int32_t execute(const int8_t *command) {
     // Copy over esp and esb
     asm volatile("movl %%esp,%0 \n\t"
                  "movl %%ebp,%0 \n\t"
-                 : "=r"(esp_temp), "=r"(esb_temp)
+                 : "=r"(esp_temp), "=r"(ebp_temp)
                  );
 
     // Copy command
@@ -107,7 +107,7 @@ int32_t execute(const int8_t *command) {
     // Map memory and move program code to execution start
     remap(VIRTUAL_START, PHYSICAL_START + pcb_new->pid * FOUR_MB_BLOCK);
     //memcpy((uint8_t *)EXECUTE_START, buffer, PROCESS_SIZE);
-    read_data(dentry.inode_num, 0, buffer, inodes[dentry.inode_num].length);
+    read_data(dentry.inode_num, 0, (uint8_t *) EXECUTE_START, inodes[dentry.inode_num].length);
 
     // Set up flags
     uint32_t temp_ds = USER_DS;
@@ -118,7 +118,7 @@ int32_t execute(const int8_t *command) {
     tss.esp0 = PHYSICAL_START - pcb_new->pid * EIGHT_KB_BLOCK - MAGIC_SIZE;
 
     pcb_new->parent->esp = esp_temp;
-    pcb_new->parent->ebp = esb_temp;
+    pcb_new->parent->ebp = ebp_temp;
     pcb_new->args = arg_buf;
 
     // Not sure

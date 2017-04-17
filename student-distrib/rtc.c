@@ -22,9 +22,6 @@ void rtc_handler() {
 
     int_occur = 1;
 
-    // Checkpoint 2
-    putc('1');
-
     // Throw away contents
     outb(RTC_REG_C, RTC_PORT);
     inb(CMOS_PORT);

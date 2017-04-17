@@ -184,7 +184,13 @@ entry (unsigned long magic, unsigned long addr)
     printf("Executing shell...\n");
 	/* Execute the first program (`shell') ... */
 
-    execute("shell");
+    rtc_open(NULL);
+    rtc_freq_t freq = F64HZ;
+    rtc_write(0, &freq, 4);
+    while (1) {
+        rtc_read(0, NULL, 0);
+        printf("Read RTC\n");
+    }
 
 	/* Spin (nicely, so we don't chew up cycles) */
 	asm volatile(".1: hlt; jmp .1;");
