@@ -5,7 +5,7 @@
 
 #define MAX_FILES 8
 #define MAX_ARGS_LENGTH 128
-#define MAX_PROCESSES 2
+#define MAX_PROCESSES 8
 
 // Flags
 #define FILE_OPEN 0x00000001
@@ -18,16 +18,19 @@
 #define MAGIC2 0x4C
 #define MAGIC3 0x46
 
+#define USER_STACK 0x83FFFFC
+#define EIGHT_KB_BLOCK 0x2000
 #define FOUR_MB_BLOCK 0x400000
-#define KB8 0x2000
 #define PROCESS_SIZE 4096
 
 #define VIRTUAL_START 0x08000000
 #define PHYSICAL_START 0x800000
 #define EXECUTE_START 0x08048000
 
+#define PCB_MASK 0x00FFE000
+
 typedef struct fileops {
-    int32_t (*open) (const int8_t filename);
+    int32_t (*open) (const int8_t *filename);
     int32_t (*close) (int32_t fd);
     int32_t (*read) (int32_t fd, void *buf, int32_t nbytes);
     int32_t (*write) (int32_t fd, const void *buf, int32_t nbytes);
@@ -41,10 +44,12 @@ typedef struct file {
 } file_t;
 
 typedef struct pcb {
+    struct pcb *parent;
     file_t files[MAX_FILES];
     uint8_t pid;
-    uint8_t parent_pid;
-    int8_t args[MAX_ARGS_LENGTH];
+    int8_t *args;
+    int32_t esp;
+    int32_t ebp;
 } pcb_t;
 
 int32_t halt(uint8_t status);
@@ -59,7 +64,7 @@ int32_t open(const int8_t *filename);
 
 int32_t close(int32_t fd);
 
-int32_t getargs(uint8_t *buf, int32_t nbytes);
+int32_t getargs(int8_t *buf, int32_t nbytes);
 
 int32_t vidmap(uint8_t **screen_start);
 
@@ -68,6 +73,8 @@ int32_t set_handler(int32_t signum, void *handler_address);
 int32_t sigreturn();
 
 int32_t fail();
+
+pcb_t *create_pcb();
 
 pcb_t *get_current_pcb();
 

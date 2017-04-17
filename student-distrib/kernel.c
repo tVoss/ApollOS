@@ -8,6 +8,7 @@
 #include "i8259.h"
 #include "debug.h"
 
+#include "syscalls.h"
 #include "keyboard.h"
 #include "rofs.h"
 #include "rtc.h"
@@ -164,9 +165,6 @@ entry (unsigned long magic, unsigned long addr)
 
 	/* Initialize devices, memory, filesystem, enable device interrupts on the
 	 * PIC, any other initialization stuff... */
-    printf("Initing RTC... ");
-    init_rtc();
-    printf("Done!\n");
 
     printf("Initing Keyboard... ");
     init_keyboard();
@@ -183,8 +181,10 @@ entry (unsigned long magic, unsigned long addr)
 	//Turn paging on
 	init_paging();
 
-    printf("Ready to test!\nType text into the terminal or press Ctrl+[1,2,3,4,5]\n");
+    printf("Executing shell...\n");
 	/* Execute the first program (`shell') ... */
+
+    execute("shell");
 
 	/* Spin (nicely, so we don't chew up cycles) */
 	asm volatile(".1: hlt; jmp .1;");

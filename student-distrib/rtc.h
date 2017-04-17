@@ -32,19 +32,15 @@ typedef enum rtc_freq {
     F0HZ        = 0
 } rtc_freq_t;
 
-/* Initialize the Real Time Clock */
-extern void init_rtc();
-/* Set the frequency of the clock */
-extern void rtc_set_frequency(rtc_freq_t freq);
 /* Handle clock interrupts */
 extern void rtc_handler();
 /* Opens file */
-extern int32_t rtc_open();
+extern int32_t rtc_open(const int8_t *filename);
 /* Closes file */
-extern int32_t rtc_close();
+extern int32_t rtc_close(int32_t fd);
 /* Reads rtc after interrupt */
-extern int32_t rtc_read(int32_t *buf, int32_t nbytes);
+extern int32_t rtc_read(int32_t fd, void *buf, int32_t nbytes);
 /* Writes frequency of rtc */
-extern int32_t rtc_write(int32_t *buf, int32_t nbytes);
+extern int32_t rtc_write(int32_t fd, const void *buf, int32_t nbytes);
 
 #endif

@@ -3,52 +3,9 @@
 #include "i8259.h"
 #include "lib.h"
 #include "x86_desc.h"
-/*
- * init_rtc(void)
- *
- * DESCRIPTION: Initialize the Real Time Clock, enables
- *              its PIC line and sets the frequency to 2Hz
- *
- * INPUTS: 	none
- * OUTPUTS: none
- *
- * SIDE EFFECTS: Initalizes the RTC
- *
- */
+
 int int_occur = 0;
-void init_rtc() {
-    cli();
-    // Turn RTC on
-    outb(RTC_REG_B, RTC_PORT);
-    char prev = inb(CMOS_PORT);
-    outb(RTC_REG_B, RTC_PORT);
-    outb(prev | RTC_ENABLE_INTERRUPT, CMOS_PORT);
-    // 0Hz initially -- for testing
-    rtc_set_frequency(F0HZ);
-    // Enable interrupts
-    enable_irq(RTC_IRQ_LINE);
-    sti();
-}
-/*
- * rtc_set_frequency(freq)
- *
- * DESCRIPTION: Changes te frequency of the RTC to one
- *              of 14 valid options (0Hz - 8192Hz)
- *
- * INPUTS: 	freq - The value of the desired frequency
- * OUTPUTS: none
- *
- * SIDE EFFECTS: Sets the frequency of the RTC
- *
- */
-void rtc_set_frequency(rtc_freq_t freq) {
-    cli();
-    outb(RTC_REG_A, RTC_PORT);
-    char prev = inb(CMOS_PORT);
-    outb(RTC_REG_A, RTC_PORT);
-    outb((prev & RTC_SET_RATE) | freq, CMOS_PORT);
-    sti();
-}
+
 /*
  * rtc_handler(void)
  *
@@ -87,10 +44,21 @@ void rtc_handler() {
  * SIDE EFFECTS: opens file
  *
  */
-int32_t rtc_open(void)
+int32_t rtc_open(const int8_t *filename)
 {
+    cli();
+    // Turn RTC on
+    outb(RTC_REG_B, RTC_PORT);
+    char prev = inb(CMOS_PORT);
+    outb(RTC_REG_B, RTC_PORT);
+    outb(prev | RTC_ENABLE_INTERRUPT, CMOS_PORT);
+    // Enable interrupts
+    enable_irq(RTC_IRQ_LINE);
+    sti();
+
     return 0;
 }
+
 /*
  * rtc_close(void)
  *
@@ -102,7 +70,7 @@ int32_t rtc_open(void)
  * SIDE EFFECTS: closes file
  *
  */
-int32_t rtc_close(void)
+int32_t rtc_close(int32_t fd)
 {
     return 0;
 }
@@ -118,7 +86,7 @@ int32_t rtc_close(void)
  * SIDE EFFECTS: N/A
  *
  */
-int32_t rtc_read(int32_t* buf, int32_t nbytes)
+int32_t rtc_read(int32_t fd, void *buf, int32_t nbytes)
 {
     while(!int_occur)
     {
@@ -139,43 +107,20 @@ int32_t rtc_read(int32_t* buf, int32_t nbytes)
  * SIDE EFFECTS: changes frequency
  *
  */
-int32_t rtc_write(int32_t* buf, int32_t nbytes)
+int32_t rtc_write(int32_t fd, const void *buf, int32_t nbytes)
 {
-    int32_t freq;
-    int8_t r;
-    if (4 != nbytes || buf == NULL)
-    {
+    cli();
+    if (buf == NULL || nbytes < 4) {
+        sti();
         return -1;
     }
-    else
-        freq = *buf;
+
+    rtc_freq_t freq =  *((rtc_freq_t *) buf);
     outb(RTC_REG_A, RTC_PORT);
-    unsigned char a_old = inb(CMOS_PORT);
-    if(8192 || 4096 || 2048)
-            return -1;
-    switch(freq)
-    {
-        case 1024:
-            r = 0x06;
-        case 512:
-            r = 0x07;
-        case 296:
-            r = 0x08;
-        case 128:
-            r = 0x09;
-        case 64:
-            r = 0x0A;
-        case 32:
-            r = 0x0B;
-        case 16:
-            r = 0x0C;
-        case 8:
-            r = 0x0D;
-        case 4:
-            r = 0x0E;
-        case 2:
-            r = 0x0F;
-    }
+    char prev = inb(CMOS_PORT);
     outb(RTC_REG_A, RTC_PORT);
-    outb((0xF0 & a_old) | r, CMOS_PORT);
+    outb((prev & RTC_SET_RATE) | freq, CMOS_PORT);
+    sti();
+
+    return 0;
 }

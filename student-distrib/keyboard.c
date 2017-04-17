@@ -158,33 +158,6 @@ key_pressed_handler(uint8_t scancode){
         clear();
         key_buffer_pos = 0;
       }
-
-
-      static int index = 0;
-      static int freq = 0;
-
-      // CHECKPOINT 2 TESTS
-      switch (key_scancodes[keys_state][scancode]) {
-          case '1':
-            cp2_test_1();
-            break;
-          case '2':
-            cp2_test_2("frame0.txt");
-            break;
-          case '3':
-            cp2_test_3(index);
-            index = (index + 1) % 17;
-            break;
-          case '4':
-            cp2_test_4(15 - freq);
-            freq = (freq + 1) % 13;
-            break;
-          case '5':
-            cp2_test_4(0);
-            break;
-          default:
-            break;
-      }
     }
     else if (scancode < NUM_KEYS) {
         if (key_buffer_pos < KEY_BUFFER_SIZE){

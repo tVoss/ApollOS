@@ -2,8 +2,7 @@
 
 #include "lib.h"
 
-// FOR TESTING
-#include "keyboard.h"
+#include "syscalls.h"
 
 boot_block_t *boot_block;
 inode_t *inodes;
@@ -149,4 +148,66 @@ int32_t read_data(uint32_t inode, uint32_t offset, uint8_t *buf, uint32_t length
     }
 
     return i;
+}
+
+int32_t file_open(const int8_t *filename) {
+    dentry_t dentry;
+    if (read_dentry_by_name(filename, &dentry)) {
+        return -1;
+    }
+
+    if (dentry.file_type != file) {
+        return -1;
+    }
+
+    return 0;
+}
+
+int32_t file_close(int32_t fd) {
+    if (fd < 0 || fd > MAX_FILES) {
+        return -1;
+    }
+    return 0;
+}
+
+int32_t file_read(int32_t fd, void *buf, int32_t nbytes) {
+    if (fd < 0 || fd > MAX_FILES) {
+        return -1;
+    }
+
+    file_t *file = &get_current_pcb()->files[fd];
+    int32_t bytes_read = read_data(file->inode, file->pos, (uint8_t *) buf, nbytes);
+
+    if (bytes_read < 0) {
+        return -1;
+    }
+
+    file->pos += bytes_read;
+
+    return 0;
+}
+
+int32_t dir_open(const int8_t *filename) {
+    dentry_t dentry;
+    if (read_dentry_by_name(filename, &dentry)) {
+        return -1;
+    }
+
+    if (dentry.file_type != dir) {
+        return -1;
+    }
+
+    return 0;
+}
+
+int32_t dir_close(int32_t fd) {
+    if (fd < 0 || fd > MAX_FILES) {
+        return -1;
+    }
+    return 0;
+}
+
+int32_t dir_read(int32_t fd, void *buf, int32_t nbytes) {
+    // How to read directory ??
+    return 0;
 }

@@ -14,7 +14,7 @@
  * SIDE EFFECTS: none
  *
  */
-int32_t terminal_open() {
+int32_t terminal_open(const int8_t *filename) {
     return 0;
 }
 
@@ -29,7 +29,7 @@ int32_t terminal_open() {
  * SIDE EFFECTS: none
  *
  */
-int32_t terminal_close() {
+int32_t terminal_close(int32_t fd) {
     return 0;
 }
 
@@ -48,12 +48,16 @@ int32_t terminal_close() {
  *               on one line.
  *
  */
-int32_t terminal_read (int32_t fd, uint8_t *buf, int32_t nbytes) {
+int32_t terminal_read (int32_t fd, void *buf, int32_t nbytes) {
+
+
+    int8_t *byte_buf = (int8_t *) buf;
+
     int32_t bytes_read = 0;
     int32_t i = 0;
     // copy key_buffer
     while (key_buffer[i] != '\0' && i < nbytes){
-      buf[i] = key_buffer[i];
+      byte_buf[i] = key_buffer[i];
       bytes_read++;
       i++;
     }
@@ -75,13 +79,16 @@ int32_t terminal_read (int32_t fd, uint8_t *buf, int32_t nbytes) {
  * SIDE EFFECTS: data displayed to screen immediately.
  *
  */
-int32_t terminal_write(int32_t fd, uint8_t *buf, int32_t nbytes) {
+int32_t terminal_write(int32_t fd, const void *buf, int32_t nbytes) {
+
+    const int8_t *byte_buf = (int8_t *) buf;
+
     int32_t i;
     int32_t bytes_written = 0;
     for (i = 0; i < nbytes; i++){
-        if (buf[i] != '\0'){
+        if (byte_buf[i] != '\0'){
             // write the char to the terminal
-            putc(buf[i]);
+            putc(byte_buf[i]);
             bytes_written++;
         } else {
             break;
