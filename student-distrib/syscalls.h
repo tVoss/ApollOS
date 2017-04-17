@@ -10,6 +10,22 @@
 // Flags
 #define FILE_OPEN 0x00000001
 
+#define COMMAND_SIZE 128
+
+#define MAGIC_SIZE 4
+#define MAGIC0 0x7F
+#define MAGIC1 0x45
+#define MAGIC2 0x4C
+#define MAGIC3 0x46
+
+#define FOUR_MB_BLOCK 0x400000
+#define KB8 0x2000
+#define PROCESS_SIZE 4096
+
+#define VIRTUAL_START 0x08000000
+#define PHYSICAL_START 0x800000
+#define EXECUTE_START 0x08048000
+
 typedef struct fileops {
     int32_t (*open) (const int8_t filename);
     int32_t (*close) (int32_t fd);
