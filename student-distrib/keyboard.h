@@ -44,6 +44,7 @@ void putc_t(uint8_t c);
 void handle_backpace();
 /* handles enter pressed */
 void handle_enter();
+void clear_buffer();
 
 
 #endif

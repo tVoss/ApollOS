@@ -27,7 +27,12 @@ handle_syscall:
     cmpl $10, %eax
     jg bad_syscall
 
-    pushal          # Push all registers to stack
+    pushl %ebx          # Push all registers to stack
+    pushl %ecx
+    pushl %edx
+    pushl %ebp
+    pushl %esi
+    pushl %edi
 
     pushl %edx      # Manually push arguments
     pushl %ecx
@@ -39,10 +44,15 @@ handle_syscall:
 
     addl $12, %esp  # Pop arguments
 
-    popal           # Restore registers
+    popl %edi      # Restore registers
+    popl %esi
+    popl %ebp
+    popl %edx
+    popl %ecx
+    popl %ebx
     popfl
-    movl $0, %eax   # Return success
     sti
+
     iret
 
 bad_syscall:

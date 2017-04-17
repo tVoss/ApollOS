@@ -173,6 +173,21 @@ key_pressed_handler(uint8_t scancode){
     }
 }
 
+void clear_buffer() {
+
+    key_buffer_pos = 0;
+    int i;
+
+    /* uncomment to show the terminal read and write are working */
+    //terminal_read(0,key_buffer,key_buffer_pos+1);
+    //terminal_write(0,key_buffer,key_buffer_pos+1);
+
+    // clear key buffer
+    for (i = 0; i < KEY_BUFFER_SIZE; i++){
+      key_buffer[i] = '\0';
+    }
+}
+
 /*
  * handle_enter()
  *
@@ -187,20 +202,7 @@ key_pressed_handler(uint8_t scancode){
 void
 handle_enter() {
     enter_pressed = 1;    // raise the enter_pressed flag
-    int i;
-
-    /* uncomment to show the terminal read and write are working */
-    //terminal_read(0,key_buffer,key_buffer_pos+1);
-    //terminal_write(0,key_buffer,key_buffer_pos+1);
-
-    // clear key buffer
-    for (i = 0; i < KEY_BUFFER_SIZE; i++){
-      key_buffer[i] = '\0';
-    }
-
     do_enter();
-
-    key_buffer_pos = 0;
 }
 
 /*

@@ -44,12 +44,15 @@ typedef struct file {
 } file_t;
 
 typedef struct pcb {
-    struct pcb *parent;
     file_t files[MAX_FILES];
     uint8_t pid;
     int8_t args[MAX_ARGS_LENGTH];
-    int32_t esp;
-    int32_t ebp;
+    uint32_t esp;
+    uint32_t ebp;
+
+    uint32_t parent_pid;
+    uint32_t parent_esp;
+    uint32_t parent_ebp;
 } pcb_t;
 
 int32_t halt(uint8_t status);

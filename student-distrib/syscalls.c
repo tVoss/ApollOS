@@ -16,18 +16,13 @@ fileops_t fail_ops = {fail, fail, fail, fail};
 
 uint8_t processes_flags = 0;
 uint8_t keyboard_flag = 0;
-pcb_t *current_pcb = NULL;
+int8_t active_process = -1;
 
 int32_t halt(uint8_t status) {
+    cli();
+
     int i;
     pcb_t *pcb = get_current_pcb();
-    uint32_t esp_temp = pcb->parent->esp;
-    uint32_t ebp_temp = pcb->parent->ebp;
-
-    //current = pcb_new->parent;
-    remap(VIRTUAL_START, PHYSICAL_START + pcb->parent->pid * FOUR_MB_BLOCK);
-    tss.esp0 = PHYSICAL_START - pcb->parent->pid * EIGHT_KB_BLOCK - MAGIC_SIZE;
-    tss.ss0 = KERNEL_DS;
 
     for(i = 2; i < MAX_FILES; i++)
     {
@@ -37,15 +32,25 @@ int32_t halt(uint8_t status) {
         }
     }
 
-    processes_flags &= ~pcb->pid;
+    processes_flags &= ~(1 << pcb->pid);
+
+    if (processes_flags == 0) {
+        // Nothing is running, fire up a shell
+        execute("shell");
+    }
+
+    active_process = pcb->parent_pid;
+    remap(VIRTUAL_START, PHYSICAL_START + pcb->parent_pid * FOUR_MB_BLOCK);
+    tss.esp0 = pcb->parent_esp;
+    tss.ss0 = KERNEL_DS;
 
     asm volatile("movl %0, %%eax \n\t"
                  "movl %1, %%esp \n\t"
                  "movl %2, %%ebp \n\t"
                  "jmp HALT_RET_LABEL \n\t"
                  :
-                 : "r"((uint32_t)status), "r"(esp_temp), "r"(ebp_temp)
-                 : "%eax", "%esp", "%ebp"
+                 : "r"((uint32_t)status), "r"(pcb->parent_esp), "r"(pcb->parent_ebp)
+                 : "%eax"
              );
     return status;
 }
@@ -53,8 +58,6 @@ int32_t halt(uint8_t status) {
 int32_t execute(const int8_t *command) {
     cli();
 
-    uint32_t esp_temp;
-    uint32_t ebp_temp;
     uint32_t com_start;
     int8_t com_buf[COMMAND_SIZE];
     int8_t arg_buf[COMMAND_SIZE];
@@ -62,12 +65,6 @@ int32_t execute(const int8_t *command) {
     uint8_t i;
     int arg_start;
     int arg_finish;
-
-    // Copy over esp and esb
-    asm volatile("movl %%esp,%0 \n\t"
-                 "movl %%ebp,%1 \n\t"
-                 : "=r"(esp_temp), "=r"(ebp_temp)
-                 );
 
     // Copy command
     for(i = 0; (command[i] != ' ') && (command[i] != '\0') && (command[i] != '\n'); i++)
@@ -106,15 +103,17 @@ int32_t execute(const int8_t *command) {
         return -1;
     }
 
+    asm volatile (
+        "movl %%ebp, %0\n\t"
+        "movl %%esp, %1\n\t"
+        : "=r" (pcb_new->parent_ebp), "=r" (pcb_new->parent_esp)
+    );
+
     // Map memory and move program code to execution start
     remap(VIRTUAL_START, PHYSICAL_START + pcb_new->pid * FOUR_MB_BLOCK);
     read_data(dentry.inode_num, 0, (uint8_t *) EXECUTE_START, inodes[dentry.inode_num].length);
 
     // Set up flags
-    uint32_t temp_ds = USER_DS;
-    uint32_t temp_cs = USER_CS;
-    uint32_t temp_ret = 0;
-    uint32_t temp_eip = com_start;
     tss.ss0 = KERNEL_DS;
     tss.esp0 = PHYSICAL_START - pcb_new->pid * EIGHT_KB_BLOCK - MAGIC_SIZE;
 
@@ -309,12 +308,13 @@ pcb_t *create_pcb() {
     pcb_t *pcb = get_pcb(pid);
     pcb->pid = pid;
 
-    pcb->parent = current_pcb;
-    if (pcb->parent == NULL) {
-        pcb->parent = pcb;
+    if (active_process == -1 ) {
+        pcb->parent_pid = pid;
+    } else {
+        pcb->parent_pid = get_pcb(active_process)->pid;
     }
 
-    current_pcb = pcb;
+    active_process = pid;
 
     pcb->files[0].fileops = stdin_ops;
     pcb->files[0].flags = FILE_OPEN;
