@@ -24,7 +24,7 @@ int32_t read(int32_t fd, void *buf, int32_t nbytes) {
         return -1;
     }
 
-    pcb_t *pcb = NULL; // Get this somehow
+    pcb_t *pcb = get_current_pcb(); // Get this somehow
 
     if (!(pcb->files[fd].flags & FILE_OPEN)) {
         // File has not been opened - invalid
@@ -39,7 +39,7 @@ int32_t write(int32_t fd, const void *buf, int32_t nbytes) {
         return -1;
     }
 
-    pcb_t *pcb = NULL;
+    pcb_t *pcb = get_current_pcb();
 
     if (!(pcb->files[fd].flags & FILE_OPEN)) {
         // File has not been opened - invalid
@@ -50,13 +50,13 @@ int32_t write(int32_t fd, const void *buf, int32_t nbytes) {
 }
 
 int32_t open(const int8_t *filename) {
-    pcb_t *pcb = NULL;
-
     dentry_t dentry;
     if (read_dentry_by_name(filename, &dentry)) {
         // File not found
         return -1;
     }
+
+    pcb_t *pcb = get_current_pcb();
 
     int i;
     for (i = 0; i < MAX_FILES; i++) {
@@ -85,11 +85,13 @@ int32_t open(const int8_t *filename) {
             break;
         default:
             // Unknown filetype
+            pcb->files[i].flags &= ~FILE_OPEN;
             return -1;
     }
 
     if (pcb->files[i].fileops.open(filename)) {
         // Error opening
+        pcb->files[i].flags &= ~FILE_OPEN;
         return -1;
     }
 
@@ -102,7 +104,7 @@ int32_t close(int32_t fd) {
         return -1;
     }
 
-    pcb_t *pcb = NULL;
+    pcb_t *pcb = get_current_pcb();
 
     if (!(pcb->files[fd].flags & FILE_OPEN)) {
         // File isn't open, can't close
@@ -146,4 +148,8 @@ int32_t sigreturn() {
 
 int32_t fail() {
     return -1;
+}
+
+pcb_t *get_current_pcb() {
+    return NULL;
 }
