@@ -6,6 +6,7 @@
 #define MAX_FILES 8
 #define MAX_ARGS_LENGTH 128
 #define MAX_PROCESSES 8
+#define MAX_PROCESS_ERROR 1
 
 // Flags
 #define FILE_OPEN 0x00000001
@@ -24,8 +25,11 @@
 #define PROCESS_SIZE    4096
 
 #define VIRTUAL_START  0x08000000
+#define VIRTUAL_END    0x08400000       // end of 4 MB page
 #define PHYSICAL_START 0x00800000
 #define EXECUTE_START  0x08048000
+
+#define VIDEOMEM    0xB8000
 
 #define PCB_MASK 0x00FFE000
 

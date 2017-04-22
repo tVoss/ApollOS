@@ -15,7 +15,6 @@ fileops_t file_ops = {file_open, file_close, file_read, fail};
 fileops_t fail_ops = {fail, fail, fail, fail};
 
 uint8_t processes_flags = 0;
-uint8_t keyboard_flag = 0;
 int8_t active_process = -1;
 
 int32_t halt(uint8_t status) {
@@ -65,6 +64,11 @@ int32_t execute(const int8_t *command) {
     uint8_t i;
     int arg_start;
     int arg_finish;
+
+    // chekc if max number of processes are being run
+    if (processes_flags >= MAX_PROCESSES) {
+        return MAX_PROCESS_ERROR;   
+    }
 
     // Copy command
     for(i = 0; (command[i] != ' ') && (command[i] != '\0') && (command[i] != '\n'); i++)
@@ -120,11 +124,6 @@ int32_t execute(const int8_t *command) {
     //pcb_new->parent->esp = esp_temp;
     //pcb_new->parent->ebp = ebp_temp;
     strncpy(pcb_new->args, arg_buf, MAX_ARGS_LENGTH);
-
-    // Not sure
-    if (strncmp("shell", (int8_t*)com_buf, COMMAND_SIZE) != 0) {
-        keyboard_flag = 1;
-    }
 
     sti();
 
@@ -270,7 +269,13 @@ int32_t getargs(int8_t *buf, int32_t nbytes) {
 }
 
 int32_t vidmap(uint8_t **screen_start) {
-    return -1;
+    // check if lcoation provided by user is valid
+    if (screen_start == NULL || (screen_start < VIRTUAL_START && screen_start > VIRTUAL_END)){
+        return -1;
+    }
+    remapWithPageTable(VIRTUAL_END,VIDEOMEM);
+    *screen_start = VIRTUAL_END;
+    return 0;
 }
 
 int32_t set_handler(int32_t signum, void *handler_address) {
