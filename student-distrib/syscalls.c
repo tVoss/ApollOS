@@ -7,8 +7,8 @@
 #include "x86_desc.h"
 
 // All file ops
-fileops_t stdin_ops = {terminal_open, terminal_close, terminal_read, fail};
-fileops_t stdout_ops = {terminal_open, terminal_close, fail, terminal_write};
+fileops_t stdin_ops = {terminal_open, fail, terminal_read, fail};
+fileops_t stdout_ops = {terminal_open, fail, fail, terminal_write};
 fileops_t rtc_ops = {rtc_open, rtc_close, rtc_read, rtc_write};
 fileops_t dir_ops = {dir_open, dir_close, dir_read, fail};
 fileops_t file_ops = {file_open, file_close, file_read, fail};
@@ -249,11 +249,15 @@ int32_t close(int32_t fd) {
         return -1;
     }
 
-    // Set closed flag
-    pcb->files[fd].flags &= ~FILE_OPEN;
-
     // Close file
-    return pcb->files[fd].fileops.close(fd);
+    int32_t err = pcb->files[fd].fileops.close(fd);
+
+    // Set closed flag on no error
+    if (!err) {
+        pcb->files[fd].flags &= ~FILE_OPEN;
+    }
+
+    return err;
 }
 
 int32_t getargs(int8_t *buf, int32_t nbytes) {
@@ -274,11 +278,11 @@ int32_t getargs(int8_t *buf, int32_t nbytes) {
 
 int32_t vidmap(uint8_t **screen_start) {
     // check if lcoation provided by user is valid
-    if (screen_start == NULL || (screen_start < VIRTUAL_START && screen_start > VIRTUAL_END)){
+    if ((int32_t) screen_start < VIRTUAL_START || (int32_t) screen_start > VIRTUAL_END){
         return -1;
     }
     remapWithPageTable(VIRTUAL_END,VIDEOMEM);
-    *screen_start = VIRTUAL_END;
+    *screen_start = (uint8_t *) VIRTUAL_END;
     return 0;
 }
 
