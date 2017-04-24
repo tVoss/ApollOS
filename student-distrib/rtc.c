@@ -112,11 +112,17 @@ int32_t rtc_write(int32_t fd, const void *buf, int32_t nbytes)
         return -1;
     }
 
-    rtc_freq_t freq =  *((rtc_freq_t *) buf);
+    int32_t freq = *(int32_t *)buf;
+    char rate = freq == 0 ? 0 : 16;
+    while (freq > 1) {
+        rate--;
+        freq >>= 1;
+    }
+
     outb(RTC_REG_A, RTC_PORT);
     char prev = inb(CMOS_PORT);
     outb(RTC_REG_A, RTC_PORT);
-    outb((prev & RTC_SET_RATE) | freq, CMOS_PORT);
+    outb((prev & RTC_SET_RATE) | rate, CMOS_PORT);
     sti();
 
     return 0;

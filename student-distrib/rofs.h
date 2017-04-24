@@ -33,10 +33,6 @@ typedef struct inode {
 
 typedef uint8_t data_block_t[4096];
 
-extern boot_block_t *boot_block;
-extern inode_t *inodes;
-extern data_block_t *data_blocks;
-
 void init_rofs(void *base);
 // Helper function before ls is implemented
 void list_all_files();

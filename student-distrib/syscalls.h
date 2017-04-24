@@ -4,7 +4,8 @@
 #include "types.h"
 
 #define MAX_FILES 8
-#define MAX_ARGS_LENGTH 128
+#define MAX_ARGS 16
+#define MAX_ARGS_LENGTH 64
 #define MAX_PROCESSES 8
 #define MAX_PROCESS_ERROR 1
 
@@ -50,7 +51,7 @@ typedef struct file {
 typedef struct pcb {
     file_t files[MAX_FILES];
     uint8_t pid;
-    int8_t args[MAX_ARGS_LENGTH];
+    int8_t args[MAX_ARGS][MAX_ARGS_LENGTH];
     uint32_t esp;
     uint32_t ebp;
 

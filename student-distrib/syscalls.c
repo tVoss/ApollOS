@@ -10,7 +10,7 @@
 fileops_t stdin_ops = {terminal_open, terminal_close, terminal_read, fail};
 fileops_t stdout_ops = {terminal_open, terminal_close, fail, terminal_write};
 fileops_t rtc_ops = {rtc_open, rtc_close, rtc_read, rtc_write};
-fileops_t dir_ops = {fail, fail, fail, fail};
+fileops_t dir_ops = {dir_open, dir_close, dir_read, fail};
 fileops_t file_ops = {file_open, file_close, file_read, fail};
 fileops_t fail_ops = {fail, fail, fail, fail};
 
@@ -67,7 +67,7 @@ int32_t execute(const int8_t *command) {
 
     // chekc if max number of processes are being run
     if (processes_flags >= MAX_PROCESSES) {
-        return MAX_PROCESS_ERROR;   
+        return MAX_PROCESS_ERROR;
     }
 
     // Copy command
@@ -115,7 +115,7 @@ int32_t execute(const int8_t *command) {
 
     // Map memory and move program code to execution start
     remap(VIRTUAL_START, PHYSICAL_START + pcb_new->pid * FOUR_MB_BLOCK);
-    read_data(dentry.inode_num, 0, (uint8_t *) EXECUTE_START, inodes[dentry.inode_num].length);
+    read_data(dentry.inode_num, 0, (uint8_t *) EXECUTE_START, PROCESS_SIZE);
 
     // Set up flags
     tss.ss0 = KERNEL_DS;
@@ -180,7 +180,7 @@ int32_t write(int32_t fd, const void *buf, int32_t nbytes) {
         return -1;
     }
 
-    return pcb->files[fd].fileops.write(fd, (int8_t *)buf, nbytes);
+    return pcb->files[fd].fileops.write(fd, buf, nbytes);
 }
 
 int32_t open(const int8_t *filename) {
@@ -230,7 +230,8 @@ int32_t open(const int8_t *filename) {
     }
 
     pcb->files[i].inode = dentry.inode_num;
-    return 0;
+
+    return i;
 }
 
 int32_t close(int32_t fd) {

@@ -208,6 +208,22 @@ int32_t dir_close(int32_t fd) {
 }
 
 int32_t dir_read(int32_t fd, void *buf, int32_t nbytes) {
-    // How to read directory ??
-    return 0;
+
+    // See if we've reached the end of file
+    file_t *file = &get_current_pcb()->files[fd];
+    if (file->pos >= boot_block->num_dir_entries) {
+        return 0;
+    }
+
+    // Get the dentry
+    dentry_t *dentry = &boot_block->dentries[file->pos];
+
+    // Copy number of bytes requested up to max file name length
+    int32_t copy_length = nbytes > FILE_NAME_LENGTH ? FILE_NAME_LENGTH : nbytes;
+    strncpy((int8_t *)buf, dentry->file_name, copy_length);
+
+    // Increase the position and determine number of bytes copied
+    file->pos++;
+    int32_t bytes_read = strlen(dentry->file_name);
+    return bytes_read > FILE_NAME_LENGTH ? FILE_NAME_LENGTH : bytes_read;
 }
