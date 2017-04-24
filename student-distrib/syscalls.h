@@ -5,8 +5,8 @@
 
 #define MAX_FILES 8
 #define MAX_ARGS_LENGTH 128
+#define MAX_PROCESSES_MASK 0xFF
 #define MAX_PROCESSES 8
-#define MAX_PROCESS_ERROR 1
 
 // Flags
 #define FILE_OPEN 0x00000001

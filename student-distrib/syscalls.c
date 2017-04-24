@@ -67,9 +67,11 @@ int32_t execute(const int8_t *command) {
     // Must clear arg_buf manually when called as interrupt
     memset(arg_buf, 0, COMMAND_SIZE);
 
-    // chekc if max number of processes are being run
-    if (processes_flags >= MAX_PROCESSES) {
-        return MAX_PROCESS_ERROR;
+    // check if max number of processes are being run
+    if (processes_flags == MAX_PROCESSES_MASK)
+    {
+        printf("maximum number of processes reached\n");
+        return 0;
     }
 
     // Copy command

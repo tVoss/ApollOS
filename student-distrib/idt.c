@@ -3,6 +3,7 @@
 #include "interrupt_handlers.h"
 #include "lib.h"
 #include "x86_desc.h"
+#include "syscalls.h"
 
 // Exception names and values taken from IA-32 Reference Manual Section 6.15
 CREATE_EXCEPTION(EX_DIVIDE_ERROR,                   (DE) Divide Error Exception!);
@@ -29,6 +30,7 @@ CREATE_EXCEPTION(EX_FLOATING_POINT,                 (XM) SIMD Floating Point Exc
 void EX_GENERIC() {
     cli();
     printf("An unknown interrupt occured!\n");
+    halt(-1);
     sti();
 }
 
