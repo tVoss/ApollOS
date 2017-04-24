@@ -184,7 +184,7 @@ int32_t file_read(int32_t fd, void *buf, int32_t nbytes) {
 
     file->pos += bytes_read;
 
-    return 0;
+    return bytes_read;
 }
 
 int32_t dir_open(const int8_t *filename) {

@@ -58,12 +58,14 @@ int32_t execute(const int8_t *command) {
     cli();
 
     uint32_t com_start;
-    int8_t com_buf[COMMAND_SIZE];
-    int8_t arg_buf[COMMAND_SIZE];
-    uint8_t buffer[MAGIC_SIZE];
+    int8_t com_buf[COMMAND_SIZE] = {0};
+    int8_t arg_buf[COMMAND_SIZE] = {0};
+    uint8_t buffer[MAGIC_SIZE] = {0};
     uint8_t i;
     int arg_start;
-    int arg_finish;
+
+    // Must clear arg_buf manually when called as interrupt
+    memset(arg_buf, 0, COMMAND_SIZE);
 
     // chekc if max number of processes are being run
     if (processes_flags >= MAX_PROCESSES) {
@@ -77,13 +79,14 @@ int32_t execute(const int8_t *command) {
     }
     com_buf[i] = '\0';
 
-    // Copy all the arguments
-    arg_start = i + 1;
-    for(arg_finish = arg_start; (command[i] != '\0') && (command[i] != '\n'); arg_finish++)
-    {
-        arg_buf[arg_finish] = (int8_t)command[i];
+    // Copy all the arguments if we hit a space
+    if (command[i] == ' ') {
+        arg_start = i + 1;
+        for (i = 0; command[i + arg_start] != '\0' && command[i + arg_start] != '\n'; i++) {
+            arg_buf[i] = (int8_t)command[i + arg_start];
+        }
+        arg_buf[i] = '\0';
     }
-    arg_buf[arg_finish] = '\0';
 
     // Read the file
     dentry_t dentry;
@@ -193,7 +196,7 @@ int32_t open(const int8_t *filename) {
     pcb_t *pcb = get_current_pcb();
 
     int i;
-    for (i = 0; i < MAX_FILES; i++) {
+    for (i = 2; i < MAX_FILES; i++) {
         if (!(pcb->files[i].flags & FILE_OPEN)) {
             // Open slot for file
             pcb->files[i].flags |= FILE_OPEN;
@@ -258,13 +261,13 @@ int32_t getargs(int8_t *buf, int32_t nbytes) {
         return -1;
     }
 
-    pcb_t *pcb = NULL;
+    pcb_t *pcb = get_current_pcb();
 
     if (nbytes > MAX_ARGS_LENGTH) {
         nbytes = MAX_ARGS_LENGTH;
     }
 
-    strncpy(buf, pcb->args, nbytes);
+    memcpy(buf, pcb->args, nbytes);
 
     return 0;
 }
@@ -329,6 +332,16 @@ pcb_t *create_pcb() {
     pcb->files[1].fileops = stdout_ops;
     pcb->files[1].flags = FILE_OPEN;
     pcb->files[1].pos = 0;
+
+    int i;
+    for (i = 2; i < MAX_FILES; i++) {
+        pcb->files[i].fileops = fail_ops;
+        pcb->files[i].flags = 0;
+        pcb->files[i].inode = 0;
+        pcb->files[i].pos = 0;
+    }
+
+    memset(pcb->args, 0, MAX_ARGS_LENGTH);
 
     return pcb;
 }
