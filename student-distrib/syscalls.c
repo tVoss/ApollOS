@@ -57,6 +57,11 @@ int32_t halt(uint8_t status) {
 int32_t execute(const int8_t *command) {
     cli();
 
+    if (command == NULL) {
+        sti();
+        return -1;
+    }
+
     uint32_t com_start;
     int8_t com_buf[COMMAND_SIZE] = {0};
     int8_t arg_buf[COMMAND_SIZE] = {0};
@@ -189,6 +194,10 @@ int32_t write(int32_t fd, const void *buf, int32_t nbytes) {
 }
 
 int32_t open(const int8_t *filename) {
+    if (filename == NULL) {
+        return -1;
+    }
+
     dentry_t dentry;
     if (read_dentry_by_name(filename, &dentry)) {
         // File not found
@@ -279,6 +288,9 @@ int32_t getargs(int8_t *buf, int32_t nbytes) {
 }
 
 int32_t vidmap(uint8_t **screen_start) {
+    if (screen_start == NULL) {
+        return -1;
+    }
     // check if lcoation provided by user is valid
     if ((int32_t) screen_start < VIRTUAL_START || (int32_t) screen_start > VIRTUAL_END){
         return -1;
