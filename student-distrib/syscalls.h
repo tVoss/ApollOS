@@ -24,10 +24,10 @@
 #define FOUR_MB_BLOCK   0x400000
 #define PROCESS_SIZE    4096
 
-#define VIRTUAL_START  0x08000000
-#define VIRTUAL_END    0x08400000       // end of 4 MB page
-#define PHYSICAL_START 0x00800000
-#define EXECUTE_START  0x08048000
+#define VIRTUAL_START  0x8000000      // 128MB
+#define VIRTUAL_END    0x8400000       // 132MB, end of 4 MB page
+#define PHYSICAL_START 0x800000
+#define EXECUTE_START  0x8048000
 
 #define VIDEOMEM    0xB8000
 

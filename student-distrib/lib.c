@@ -3,18 +3,7 @@
  */
 
 #include "lib.h"
-
-#define VIDEO 					0xB8000
-#define NUM_COLS 				80
-#define NUM_ROWS 				25
-#define ATTRIB 					0xA
-
-/* The I/O ports */
-#define FB_COMMAND_PORT         0x3D4
-#define FB_DATA_PORT            0x3D5
-/* The I/O port commands */
-#define FB_HIGH_BYTE_COMMAND    14
-#define FB_LOW_BYTE_COMMAND     15
+#include "terminal.h"
 
 static int screen_x;
 static int screen_y;
@@ -33,7 +22,7 @@ clear(void)
     int32_t i;
     for(i=0; i<NUM_ROWS*NUM_COLS; i++) {
         *(uint8_t *)(video_mem + (i << 1)) = ' ';
-        *(uint8_t *)(video_mem + (i << 1) + 1) = ATTRIB;
+        //*(uint8_t *)(video_mem + (i << 1) + 1) = ATTRIB_B;
     }
     set_screen_pos(0, 0);
     update_cursor_loc(0, 0);
@@ -231,7 +220,7 @@ putc(uint8_t c)
         do_enter();
     } else {
         *(uint8_t *)(video_mem + ((NUM_COLS*screen_y + screen_x) << 1)) = c;
-        *(uint8_t *)(video_mem + ((NUM_COLS*screen_y + screen_x) << 1) + 1) = ATTRIB;
+        //*(uint8_t *)(video_mem + ((NUM_COLS*screen_y + screen_x) << 1) + 1) = ATTRIB_B;
         screen_x++;
         if (screen_x >= NUM_COLS) {
             do_enter();
@@ -660,7 +649,7 @@ void do_backspace() {
     }
 
     *(uint8_t *)(VIDEO + ((NUM_COLS*screen_y + screen_x) << 1)) = '\0';
-    *(uint8_t *)(VIDEO + ((NUM_COLS*screen_y + screen_x) << 1) + 1) = ATTRIB;
+    //*(uint8_t *)(VIDEO + ((NUM_COLS*screen_y + screen_x) << 1) + 1) = ATTRIB_B;
 
     update_cursor_loc(screen_x, screen_y);
 }

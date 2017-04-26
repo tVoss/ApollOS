@@ -14,6 +14,7 @@
 #include "rtc.h"
 #include "paging.h"
 #include "tests.h"
+#include "terminal.h"
 
 /* Macros. */
 /* Check if the bit BIT in FLAGS is set. */
@@ -166,7 +167,7 @@ entry (unsigned long magic, unsigned long addr)
 	/* Initialize devices, memory, filesystem, enable device interrupts on the
 	 * PIC, any other initialization stuff... */
 
-    printf("Initing Keyboard... ");
+    printf("Initializing Keyboard... ");
     init_keyboard();
     printf("Done!\n");
 
@@ -184,8 +185,8 @@ entry (unsigned long magic, unsigned long addr)
     printf("Executing shell...\n");
 	/* Execute the first program (`shell') ... */
 
-	clear();
-
+	printf("Initializing Terminals...");
+    init_terminals();
 
 	/*
 		     _      ____     ___    _       _        ___             ___    ____  
@@ -194,7 +195,7 @@ entry (unsigned long magic, unsigned long addr)
 		  / ___ \  |  __/  | |_| | | |___  | |___  | |_| |         | |_| |  ___) |
 		 /_/   \_\ |_|      \___/  |_____| |_____|  \___/   _____   \___/  |____/ 
      			                                           |_____|                
-	*/
+	
 	printf("    _      ____     ___    _       _        ___             ___    ____  \n");
     printf("   / \\    |  _ \\   / _ \\  | |     | |      / _ \\           / _ \\  / ___| \n");
    	printf("  / _ \\   | |_) | | | | | | |     | |     | | | |         | | | | \\___ \\ \n");
@@ -203,6 +204,8 @@ entry (unsigned long magic, unsigned long addr)
 	printf("                                                  |_____|                \n");
 
     execute("shell");
+	*/
+
 
 	/* Spin (nicely, so we don't chew up cycles) */
 	asm volatile(".1: hlt; jmp .1;");

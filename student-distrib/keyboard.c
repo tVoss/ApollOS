@@ -2,6 +2,7 @@
 #include "lib.h"
 #include "i8259.h"
 #include "types.h"
+#include "terminal.h"
 
 #include "tests.h"
 
@@ -28,23 +29,23 @@ static uint8_t key_scancodes[KEY_STATES][NUM_KEYS] = {
    'b', 'n', 'm', '<', '>', '?', '\0', '*', '\0', ' ', '\0'}
 };
 
+
 /* key buffer */
-volatile uint8_t key_buffer[KEY_BUFFER_SIZE];
+//volatile uint8_t *key_buffer;
 /* position in the key buffer */
 volatile uint32_t key_buffer_pos = 0;
-/* if enter has been pressed */
-volatile uint8_t enter_pressed = 0;
 
 /* global variables for keyboard state */
+volatile uint8_t enter_pressed = 0;
 static uint8_t shift_pressed = 0;
 static uint8_t capslock_state = 0;
 static uint8_t ctrl_pressed = 0;
+static uint8_t alt_pressed = 0;
 static uint8_t keys_state = 0;    // 0 = nothing pressed
                                   // 1 = shift pressed
                                   // 2 = capslock pressed
                                   // 3 = shift pressed and capslock pressed
 
-//terminal_struct_t* terminal;
 
 /*
  * init_keyboard(void)
@@ -118,6 +119,27 @@ keyboard_handler()
         case RELEASE(CTRL):
           ctrl_pressed = 0;
           break;
+        // alt pressed
+        case ALT_L:
+        case ALT_R:
+          alt_pressed = 1;
+          break;
+        // switching terminals
+        case F1_KEY:
+          // switch to terminal 1
+          if (alt_pressed == 1)
+            switch_terminal(1);
+          break;
+        case F2_KEY:
+          // switch to terminal 2
+          if (alt_pressed == 1)
+            switch_terminal(2);
+          break;
+        case F3_KEY:
+          // switch to terminal 3
+          if (alt_pressed == 1)
+            switch_terminal(3);
+          break;
         // enter pressed
         case ENTER:
           handle_enter();
@@ -179,8 +201,8 @@ void clear_buffer() {
     int i;
 
     /* uncomment to show the terminal read and write are working */
-    //terminal_read(0,key_buffer,key_buffer_pos+1);
-    //terminal_write(0,key_buffer,key_buffer_pos+1);
+    //terminal_read(0,key_buffer,key_buffer1_pos+1);
+    //terminal_write(0,key_buffer,key_buffer1_pos+1);
 
     // clear key buffer
     for (i = 0; i < KEY_BUFFER_SIZE; i++){
