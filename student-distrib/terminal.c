@@ -7,10 +7,10 @@
 
 
 /* global variables */
-volatile terminal_t terminal[MAX_TERMINALS];
-volatile int term_num;      
+volatile terminal_t terminal[MAX_TERMINALS];   
 volatile int term_cur;      // keep track of current terminal
 volatile uint8_t *key_buffer;
+//static uint8_t welcome_message[WELCOME_SIZE] = {'\0','\0','\0','\0','_','\0','\0','\0','\0','\0','\0','_','_','_','_','\0','\0','\0','\0','\0','_','_','_','\0','\0','\0','\0','_','\0','\0','\0','\0','\0','\0','\0','_','\0','\0','\0','\0','\0','\0','\0','\0','_','_','_','\0','\0','\0','\0','\0','\0','\0','\0','\0','\0','\0','\0','\0','_','_','_','\0','\0','\0','\0','_','_','_','_','\0','\0','\n','\0','\0','\0','/','\0','\\','\0','\0','\0','\0','|','\0','\0','_','\0','\\','\0','\0','\0','/','\0','_','\0','\\','\0','\0','|','\0','|','\0','\0','\0','\0','\0','|','\0','|','\0','\0','\0','\0','\0','\0','/','\0','_','\0','\\','\0','\0','\0','\0','\0','\0','\0','\0','\0','\0','\0','/','\0','_','\0','\\','\0','\0','/','\0','_','_','_','|','\0','\n','\0','\0','/','\0','_','\0','\\','\0','\0','\0','|','\0','|','_',")",'\0','|','\0','|','\0','|','\0','|','\0','|','\0','|','\0','|','\0','\0','\0','\0','\0','|','\0','|','\0','\0','\0','\0','\0','|','\0','|','\0','|','\0','|','\0','\0','\0','\0','\0','\0','\0','\0','\0','|','\0','|','\0','|','\0','|','\0','\\','_','_','_','\0','\\','\0','\n','\0','/','\0','_','_','_','\0','\\','\0','\0','|','\0','\0','_','_','/','\0','\0','|','\0','|','_','|','\0','|','\0','|','\0','|','_','_','_','\0','\0','|','\0','|','_','_','_','\0','\0','|','\0','|','_','|','\0','|','\0','\0','\0','\0','\0','\0','\0','\0','\0','|','\0','|','_','|','\0','|','\0','\0','_','_','_',")",'\0','|','\n', '/','_','/','\0','\0','\0','\\','_','\\','\0','|','_','|','\0','\0','\0','\0','\0','\0','\\','_','_','_','/','\0','\0','|','_','_','_','_','_','|','\0','|','_','_','_','_','_','|','\0','\0','\\','_','_','_','/','\0','\0','\0','_','_','_','_','_','\0','\0','\0','\\','_','_','_','/','\0','\0','|','_','_','_','_','/','\0','\n','\0','\0','\0','\0','\0','\0','\0','\0','\0','\0','\0','\0','\0','\0','\0','\0','\0','\0','\0','\0','\0','\0','\0','\0','\0','\0','\0','\0','\0','\0','\0','\0','\0','\0','\0','\0','\0','\0','\0','\0','\0','\0','\0','\0','\0','\0','\0','\0','\0','\0','|','_','_','_','_','_','|','\0','\0','\0','\0','\0','\0','\0','\0','\0','\0','\0','\0','\0','\0','\0','\0','\n'};
 
 /*
  * terminal_open()
@@ -61,7 +61,7 @@ void init_terminals () {
         terminal[i].enter_pressed = 0;
         terminal[i].pos_x = 0;
         terminal[i].pos_y = 0;
-        terminal[i].init = 0;
+        terminal[i].init = 1;
         for (j = 0; j < KEY_BUFFER_SIZE; j++){
             terminal[i].key_buffer[j] = '\0';
         }
@@ -84,18 +84,7 @@ void init_terminals () {
     }
     // start terminal 1
     term_cur = 1;
-    terminal[0].init = 1;
-    terminal[1].init = 1;
-    key_buffer = terminal[0].key_buffer;
-    key_buffer_pos = terminal[0].key_buffer_pos;
-    set_screen_pos(terminal[0].pos_x, terminal[0].pos_y);
-    memcpy((uint8_t *)VIDEO, (uint8_t *)terminal[0].vid_mem, 2*NUM_ROWS*NUM_COLS);
-    printf("    _      ____     ___    _       _        ___             ___    ____  \n");
-    printf("   / \\    |  _ \\   / _ \\  | |     | |      / _ \\           / _ \\  / ___| \n");
-    printf("  / _ \\   | |_) | | | | | | |     | |     | | | |         | | | | \\___ \\ \n");
-    printf(" / ___ \\  |  __/  | |_| | | |___  | |___  | |_| |         | |_| |  ___) |\n");
-    printf("/_/   \\_\\ |_|      \\___/  |_____| |_____|  \\___/   _____   \\___/  |____/ \n");
-    printf("                                                  |_____|                \n");
+    terminal_start(term_cur);
     execute("shell");
 }
 
@@ -107,30 +96,21 @@ int32_t switch_terminal(int term) {
         return 0;
     }
     // check if terminal hasn't been started yet
+    /*
     if (terminal[term-1].init == 0) {
         // save current termial
         terminal[term_cur-1].key_buffer_pos = key_buffer_pos;
         terminal[term_cur-1].pos_x = get_screen_x();
         terminal[term_cur-1].pos_y = get_screen_y();
         memcpy((uint8_t *)terminal[term_cur-1].vid_mem, (uint8_t *)VIDEO, 2*NUM_ROWS*NUM_COLS);
-        clear();
+        //clear();
         // start new terminal
-        terminal[term-1].init = 1;
-        key_buffer = terminal[term-1].key_buffer;
-        key_buffer_pos = terminal[term-1].key_buffer_pos;
-        set_screen_pos(terminal[term_num-1].pos_x, terminal[term_num-1].pos_y);
-        memcpy((uint8_t *)VIDEO, (uint8_t *)terminal[term-1].vid_mem, 2*NUM_ROWS*NUM_COLS);
-        printf("    _      ____     ___    _       _        ___             ___    ____  \n");
-        printf("   / \\    |  _ \\   / _ \\  | |     | |      / _ \\           / _ \\  / ___| \n");
-        printf("  / _ \\   | |_) | | | | | | |     | |     | | | |         | | | | \\___ \\ \n");
-        printf(" / ___ \\  |  __/  | |_| | | |___  | |___  | |_| |         | |_| |  ___) |\n");
-        printf("/_/   \\_\\ |_|      \\___/  |_____| |_____|  \\___/   _____   \\___/  |____/ \n");
-        printf("                                                  |_____|                \n");
-        term_cur = term;
+        terminal_start(term);
         sti();
         execute("shell");
         return 0;
     }
+    */
     // check if termiinal has already been started
     if (terminal[term-1].init == 1){
         // save current terminal
@@ -138,7 +118,7 @@ int32_t switch_terminal(int term) {
         terminal[term_cur-1].pos_x = get_screen_x();
         terminal[term_cur-1].pos_x = get_screen_y();
         memcpy((uint8_t *)terminal[term_cur-1].vid_mem, (uint8_t *)VIDEO, 2*NUM_ROWS*NUM_COLS);
-        clear();
+        //clear();
         // switch terminals
         key_buffer = terminal[term-1].key_buffer;
         key_buffer_pos = terminal[term-1].key_buffer_pos;
@@ -151,6 +131,20 @@ int32_t switch_terminal(int term) {
     }
 }
 
+
+int32_t terminal_start(int term) {
+    //int8_t i;
+    //terminal[term-1].init = 1;
+    key_buffer = terminal[term-1].key_buffer;
+    key_buffer_pos = terminal[term-1].key_buffer_pos;
+    set_screen_pos(terminal[term-1].pos_x, terminal[term-1].pos_y);
+    memcpy((uint8_t *)VIDEO, (uint8_t *)terminal[term-1].vid_mem, 2*NUM_ROWS*NUM_COLS);
+    //for (i = 0; i < WELCOME_SIZE; i++){
+    //    putc(welcome_message[i]);
+    //}
+    term_cur = term;
+    return 0;
+}
 
 /*
  * terminal_read()

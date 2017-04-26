@@ -16,6 +16,7 @@
 #define ATTRIB_G		0xA
 #define ATTRIB_Y 		0xE
 #define ATTRIB_B 		0xB
+#define WELCOME_SIZE	444
 
 typedef struct {
 
@@ -35,7 +36,7 @@ typedef struct {
 } terminal_t;
 
 extern volatile terminal_t terminal[MAX_TERMINALS];
-extern volatile int term_num;
+extern volatile int term_cur;
 /* key buffer */
 extern volatile uint8_t *key_buffer;
 
@@ -44,6 +45,7 @@ extern int32_t terminal_open(const int8_t *filename);
 extern int32_t terminal_close(int32_t fd);
 extern void init_terminals();
 extern int32_t switch_terminal(int term);
+extern int32_t terminal_start(int term);
 extern int32_t terminal_read (int32_t fd, void *buf, int32_t nbytes);
 extern int32_t terminal_write (int32_t fd, const void *buf, int32_t nbytes);
 
