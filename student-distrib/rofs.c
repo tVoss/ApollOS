@@ -175,11 +175,21 @@ int32_t file_read(int32_t fd, void *buf, int32_t nbytes) {
         return -1;
     }
 
+    uint8_t *byte_buf = (uint8_t *)buf;
+
     file_t *file = &get_current_pcb()->files[fd];
-    int32_t bytes_read = read_data(file->inode, file->pos, (uint8_t *) buf, nbytes);
+    int32_t bytes_read = read_data(file->inode, file->pos, byte_buf, nbytes);
 
     if (bytes_read < 0) {
         return -1;
+    }
+
+    int i;
+    for (i = 0; i < bytes_read; i++) {
+        if ((byte_buf[i] < ' ' || byte_buf[i] > '~')        // Only show visible ASCII characters
+            && byte_buf[i] != '\n' && byte_buf[i] != '\t') { // With some exceptions
+            byte_buf[i] = ' ';
+        }
     }
 
     file->pos += bytes_read;
