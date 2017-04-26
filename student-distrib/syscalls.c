@@ -278,6 +278,10 @@ int32_t getargs(int8_t *buf, int32_t nbytes) {
 
     pcb_t *pcb = get_current_pcb();
 
+    if (strlen(pcb->args) == 0) {
+        return -1;
+    }
+
     if (nbytes > MAX_ARGS_LENGTH) {
         nbytes = MAX_ARGS_LENGTH;
     }
