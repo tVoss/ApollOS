@@ -81,9 +81,8 @@ void init_terminals () {
         *(uint8_t *)(TERM_3_MEM + (i << 1)) = ' ';
         *(uint8_t *)(TERM_3_MEM + (i << 1) + 1) = ATTRIB_Y;
     }
-    // start terminal 1
+    // start all terminals
     term_cur = 1;
-    //terminal[1].init = 1;
     terminal_start(1);
     terminal_start(2);
     terminal_start(3);
@@ -120,7 +119,6 @@ int32_t switch_terminal(int term) {
 
 
 int32_t terminal_start(int term){
-    //terminal[term-1].init = 1;
     key_buffer = terminal[term-1].key_buffer;
     key_buffer_pos = terminal[term-1].key_buffer_pos;
     set_screen_pos(terminal[term-1].pos_x, terminal[term-1].pos_y);
