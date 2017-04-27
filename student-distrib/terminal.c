@@ -99,33 +99,23 @@ int32_t switch_terminal(int term) {
     // check if terminal hasn't been started yet
     if (terminal[term-1].init == 0) {
         // save current termial
-        terminal[term_cur-1].key_buffer_pos = key_buffer_pos;
-        terminal[term_cur-1].pos_x = get_screen_x();
-        terminal[term_cur-1].pos_y = get_screen_y();
-        memcpy((uint8_t *)terminal[term_cur-1].vid_mem, (uint8_t *)VIDEO, 2*NUM_ROWS*NUM_COLS);
+        terminal_save(term_cur);
         clear();
         // start new terminal
         terminal_start(term);
-        sti();
         execute("shell");
     }
     // check if termiinal has already been started
     if (terminal[term-1].init == 1){
         // save current terminal
-        terminal[term_cur-1].key_buffer_pos = key_buffer_pos;
-        terminal[term_cur-1].pos_x = get_screen_x();
-        terminal[term_cur-1].pos_x = get_screen_y();
-        memcpy((uint8_t *)terminal[term_cur-1].vid_mem, (uint8_t *)VIDEO, 2*NUM_ROWS*NUM_COLS);
+        terminal_save(term_cur);
         clear();
         // switch terminals
-        key_buffer = terminal[term-1].key_buffer;
-        key_buffer_pos = terminal[term-1].key_buffer_pos;
-        set_screen_pos(terminal[term-1].pos_x, terminal[term-1].pos_y);
-        memcpy((uint8_t *)VIDEO, (uint8_t *)terminal[term-1].vid_mem, 2*NUM_ROWS*NUM_COLS);
+        terminal_load(term);
         // update the current terminal tracker
         term_cur = term;
-        sti();
     }
+    sti();
     return 0;
 }
 
@@ -144,6 +134,21 @@ int32_t terminal_start(int term){
     printf("                                                  |_____|                \n");
     term_cur = term;
     return 0; 
+}
+
+int32_t terminal_save(int term){
+    terminal[term-1].key_buffer_pos = key_buffer_pos;
+    terminal[term-1].pos_x = get_screen_x();
+    terminal[term-1].pos_y = get_screen_y();
+    memcpy((uint8_t *)terminal[term-1].vid_mem, (uint8_t *)VIDEO, 2*NUM_ROWS*NUM_COLS);
+    return 0; 
+}
+
+int32_t terminal_load(int term){
+    key_buffer = terminal[term-1].key_buffer;
+    key_buffer_pos = terminal[term-1].key_buffer_pos;
+    set_screen_pos(terminal[term-1].pos_x, terminal[term-1].pos_y);
+    memcpy((uint8_t *)VIDEO, (uint8_t *)terminal[term-1].vid_mem, 2*NUM_ROWS*NUM_COLS);
 }
 
 
