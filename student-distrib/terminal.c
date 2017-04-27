@@ -85,6 +85,8 @@ void init_terminals () {
     term_cur = 1;
     //terminal[1].init = 1;
     terminal_start(1);
+    terminal_start(2);
+    terminal_start(3);
 }
 
 int32_t switch_terminal(int term) {
@@ -131,6 +133,7 @@ int32_t terminal_start(int term){
     printf("                                                  |_____|                \n");
     term_cur = term;
     execute("shell");
+    terminal_save(term);
     return 0; 
 }
 
