@@ -23,7 +23,6 @@ typedef struct {
 	uint8_t num;	// which of the three terminals
 	uint8_t key_buffer[KEY_BUFFER_SIZE];
 	uint32_t key_buffer_pos;
-	uint8_t enter_pressed;
 
 	// cursor x,y location
 	int pos_x;
@@ -31,7 +30,7 @@ typedef struct {
 
 	uint8_t *vid_mem;	// pointer to video memory for terminal
 
-	int init;	// has the terminal been launched? yes(1), no(0)
+	//int init;	// has the terminal been launched? yes(1), no(0)
 
 } terminal_t;
 
@@ -46,6 +45,7 @@ extern int32_t terminal_close(int32_t fd);
 extern void init_terminals();
 extern int32_t switch_terminal(int term);
 extern int32_t terminal_start(int term);
+extern int32_t terminal_save(int term);
 extern int32_t terminal_load(int term);
 extern int32_t terminal_read (int32_t fd, void *buf, int32_t nbytes);
 extern int32_t terminal_write (int32_t fd, const void *buf, int32_t nbytes);

@@ -58,10 +58,9 @@ void init_terminals () {
     for (i = 0; i < MAX_TERMINALS ; i++){
         terminal[i].num = i+1;
         terminal[i].key_buffer_pos = 0;
-        terminal[i].enter_pressed = 0;
         terminal[i].pos_x = 0;
         terminal[i].pos_y = 0;
-        terminal[i].init = 0;
+        //terminal[i].init = 0;
         for (j = 0; j < KEY_BUFFER_SIZE; j++){
             terminal[i].key_buffer[j] = '\0';
         }
@@ -84,9 +83,8 @@ void init_terminals () {
     }
     // start terminal 1
     term_cur = 1;
-    terminal[1].init = 1;
+    //terminal[1].init = 1;
     terminal_start(1);
-    execute("shell");
 }
 
 int32_t switch_terminal(int term) {
@@ -96,32 +94,31 @@ int32_t switch_terminal(int term) {
         sti();
         return 0;
     }
+    /*
     // check if terminal hasn't been started yet
     if (terminal[term-1].init == 0) {
         // save current termial
         terminal_save(term_cur);
-        clear();
         // start new terminal
         terminal_start(term);
-        execute("shell");
     }
+    */
     // check if termiinal has already been started
-    if (terminal[term-1].init == 1){
-        // save current terminal
-        terminal_save(term_cur);
-        clear();
-        // switch terminals
-        terminal_load(term);
-        // update the current terminal tracker
-        term_cur = term;
-    }
+    //if (terminal[term-1].init == 1){
+    // save current terminal
+    terminal_save(term_cur);
+    // switch terminals
+    terminal_load(term);
+    // update the current terminal tracker
+    term_cur = term;
+    //}
     sti();
     return 0;
 }
 
 
 int32_t terminal_start(int term){
-    terminal[term-1].init = 1;
+    //terminal[term-1].init = 1;
     key_buffer = terminal[term-1].key_buffer;
     key_buffer_pos = terminal[term-1].key_buffer_pos;
     set_screen_pos(terminal[term-1].pos_x, terminal[term-1].pos_y);
@@ -133,8 +130,10 @@ int32_t terminal_start(int term){
     printf("/_/   \\_\\ |_|      \\___/  |_____| |_____|  \\___/   _____   \\___/  |____/ \n");
     printf("                                                  |_____|                \n");
     term_cur = term;
+    execute("shell");
     return 0; 
 }
+
 
 int32_t terminal_save(int term){
     terminal[term-1].key_buffer_pos = key_buffer_pos;
@@ -144,11 +143,14 @@ int32_t terminal_save(int term){
     return 0; 
 }
 
+
 int32_t terminal_load(int term){
     key_buffer = terminal[term-1].key_buffer;
     key_buffer_pos = terminal[term-1].key_buffer_pos;
     set_screen_pos(terminal[term-1].pos_x, terminal[term-1].pos_y);
+    update_cursor_loc(get_screen_x(),get_screen_y());
     memcpy((uint8_t *)VIDEO, (uint8_t *)terminal[term-1].vid_mem, 2*NUM_ROWS*NUM_COLS);
+    return 0;
 }
 
 
