@@ -119,10 +119,7 @@ int32_t switch_terminal(int term) {
 
 
 int32_t terminal_start(int term){
-    key_buffer = terminal[term-1].key_buffer;
-    key_buffer_pos = terminal[term-1].key_buffer_pos;
-    set_screen_pos(terminal[term-1].pos_x, terminal[term-1].pos_y);
-    memcpy((uint8_t *)VIDEO, (uint8_t *)terminal[term-1].vid_mem, 2*NUM_ROWS*NUM_COLS);
+    terminal_load(term);
     printf("    _      ____     ___    _       _        ___             ___    ____  \n");
     printf("   / \\    |  _ \\   / _ \\  | |     | |      / _ \\           / _ \\  / ___| \n");
     printf("  / _ \\   | |_) | | | | | | |     | |     | | | |         | | | | \\___ \\ \n");
