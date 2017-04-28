@@ -156,19 +156,15 @@ entry (unsigned long magic, unsigned long addr)
 		ltr(KERNEL_TSS);
 	}
 
-    printf("Welcome to ApollOS\n");
 
 	/* Init the PIC */
-    printf("Initing PIC... ");
+    //printf("Initing PIC... ");
 	i8259_init();
-    printf("Done!\n");
+    //printf("Done!\n");
 
 	/* Initialize devices, memory, filesystem, enable device interrupts on the
 	 * PIC, any other initialization stuff... */
 
-    printf("Initing Keyboard... ");
-    init_keyboard();
-    printf("Done!\n");
 
 	/* Enable interrupts */
 	/* Do not enable the following until after you have set up your
@@ -181,8 +177,41 @@ entry (unsigned long magic, unsigned long addr)
 	//Turn paging on
 	init_paging();
 
-    printf("Executing shell...\n");
-	/* Execute the first program (`shell') ... */
+    //printf("Welcome to ApollOS\n");
+    /*
+        _      ____     ___    _       _        ___             ___    ____
+       / \    |  _ \   / _ \  | |     | |      / _ \           / _ \  / ___|
+      / _ \   | |_) | | | | | | |     | |     | | | |         | | | | \___ \
+     / ___ \  |  __/  | |_| | | |___  | |___  | |_| |         | |_| |  ___) |
+    /_/   \_\ |_|      \___/  |_____| |_____|  \___/   _____   \___/  |____/
+                                                      |_____|
+    */
+
+    clear();
+
+    rtc_open(NULL);
+    int32_t freq = 2;
+    rtc_write(0, &freq, 4);
+
+    printf("    _      ____     ___    _       _        ___             ___    ____  \n");
+    printf("   / \\    |  _ \\   / _ \\  | |     | |      / _ \\           / _ \\  / ___| \n");
+    printf("  / _ \\   | |_) | | | | | | |     | |     | | | |         | | | | \\___ \\ \n");
+    printf(" / ___ \\  |  __/  | |_| | | |___  | |___  | |_| |         | |_| |  ___) |\n");
+    printf("/_/   \\_\\ |_|      \\___/  |_____| |_____|  \\___/   _____   \\___/  |____/ \n");
+    printf("                                                  |_____|                \n");
+    printf("Loading");
+
+    int i;
+    for (i = 0; i < 10; i++) {
+        rtc_read(0, NULL, 0);
+        if (i & 1) {
+            printf(".");
+        }
+    }
+    rtc_close(0);
+
+    init_keyboard();
+    clear();
 
     execute("shell");
 
