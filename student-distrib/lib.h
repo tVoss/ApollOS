@@ -105,9 +105,9 @@ do {                                    \
 /* Writes four bytes to four consecutive ports */
 #define outl(data, port)                \
 do {                                    \
-	asm volatile("outl  %1, %0"     \
+	asm volatile("outl  %k1, (%w0)"     \
 			:                           \
-			: "dN" (port), "a" (data)    \
+			: "d" (port), "a" (data)    \
 			: "memory", "cc" );         \
 } while(0)
 

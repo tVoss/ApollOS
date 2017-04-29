@@ -93,7 +93,8 @@
 #define E1000_NUM_TX_DESC 8
 
 typedef struct e1000_rx_desc {
-    volatile uint32_t addr;
+    // Keeping this 64 bit if hardware expects it
+    volatile uint64_t addr;
     volatile uint16_t length;
     volatile uint16_t checksum;
     volatile uint8_t status;
@@ -102,7 +103,8 @@ typedef struct e1000_rx_desc {
 } __attribute__((packed)) e1000_rx_desc_t;
 
 typedef struct e1000_tx_desc {
-    volatile uint32_t addr;
+    // Keeping this 64 bit if hardware expects it
+    volatile uint64_t addr;
     volatile uint16_t length;
     volatile uint8_t cso;
     volatile uint8_t cmd;

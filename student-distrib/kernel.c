@@ -15,6 +15,8 @@
 #include "paging.h"
 #include "tests.h"
 
+#include "network/driver.h"
+
 /* Macros. */
 /* Check if the bit BIT in FLAGS is set. */
 #define CHECK_FLAG(flags,bit)   ((flags) & (1 << (bit)))
@@ -169,6 +171,9 @@ entry (unsigned long magic, unsigned long addr)
     printf("Initing Keyboard... ");
     init_keyboard();
     printf("Done!\n");
+
+    printf("Initing Netowrk...\n");
+    init_network();
 
 	/* Enable interrupts */
 	/* Do not enable the following until after you have set up your
