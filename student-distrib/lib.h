@@ -105,9 +105,9 @@ do {                                    \
 /* Writes four bytes to four consecutive ports */
 #define outl(data, port)                \
 do {                                    \
-	asm volatile("outl  %l1, (%w0)"     \
+	asm volatile("outl  %1, %0"     \
 			:                           \
-			: "d" (port), "a" (data)    \
+			: "dN" (port), "a" (data)    \
 			: "memory", "cc" );         \
 } while(0)
 
@@ -157,5 +157,15 @@ do {                                    \
 			: "memory", "cc"        \
 			);                      \
 } while(0)
+
+#define read8(addr) *((volatile uint8_t*)(addr));
+#define read16(addr) *((volatile uint16_t*)(addr));
+#define read32(addr) *((volatile uint32_t*)(addr));
+#define read64(addr) *((volatile uint64_t*)(addr));
+
+#define write8(value, addr) *(volatile uint8_t *) (addr) = (value);
+#define write16(value, addr) *(volatile uint16_t *) (addr) = (value);
+#define write32(value, addr) *(volatile uint32_t *) (addr) = (value);
+#define write64(value, addr) *(volatile uint64_t *) (addr) = (value);
 
 #endif /* _LIB_H */
