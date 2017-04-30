@@ -172,8 +172,10 @@ entry (unsigned long magic, unsigned long addr)
     init_keyboard();
     printf("Done!\n");
 
-    printf("Initing Netowrk...\n");
+    printf("Initing Network...\n");
     init_network();
+    int8_t *data = "This is a test";
+    send_packet((uint8_t *) data, 16);
 
 	/* Enable interrupts */
 	/* Do not enable the following until after you have set up your

@@ -10,4 +10,7 @@ void handle_keyboard();
 /* Handler for Syscalls */
 void handle_syscall();
 
+/* Handler for Network */
+void handle_network();
+
 #endif

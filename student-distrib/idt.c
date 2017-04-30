@@ -34,6 +34,13 @@ void EX_GENERIC() {
     sti();
 }
 
+void EX_UPPER() {
+    cli();
+    printf("Upper handler got called\n");
+    halt(-1);
+    sti();
+}
+
 /*
  * init_idt(void)
  *
@@ -111,6 +118,7 @@ void init_idt() {
     SET_IDT_ENTRY(idt[INT_RTC], handle_rtc);
     SET_IDT_ENTRY(idt[INT_KEYBOARD], handle_keyboard);
     SET_IDT_ENTRY(idt[INT_SYSCALL], handle_syscall);
+    SET_IDT_ENTRY(idt[INT_NETWORK], handle_network);
 
     lidt(idt_desc_ptr);
 }

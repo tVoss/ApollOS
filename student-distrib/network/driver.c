@@ -155,6 +155,9 @@ void init_tx() {
         (64 << TCTL_COLD_SHIFT) |
         TCTL_RTLC
     );
+
+    write_cmd(REG_TCTRL, 0x3003F0FA);
+    write_cmd(REG_TIPG, 0x0060200A);
 }
 
 void enable_interrupts() {
@@ -164,15 +167,62 @@ void enable_interrupts() {
     read_cmd(0xC0);
 }
 
+void start_link() {
+
+}
 
 void init_network() {
     read_mac();
+    start_link()
 
-    printf("Mac: ");
     int i;
-    for (i = 0; i < 5; i++) {
-        printf("%x:", mac[i]);
+    // Clear out memory
+    for (i = 0; i < 0x80; i++) {
+        write_cmd(0x5200 + i * 4, 0);
     }
-    printf("%x\n", mac[i]);
 
+    enable_interrupts();
+    init_rx();
+    init_tx();
+}
+
+void handle_recieve() {
+    uint16_t old_cur;
+
+    while((rx_descs[rx_cur].status & 0x1)) {
+        uint8_t *buf = (uint8_t *) (uint32_t) rx_descs[rx_cur].addr;
+        uint16_t len = rx_descs[rx_cur].length;
+
+        // Send to ethernet
+
+        rx_descs[rx_cur].status = 0;
+        old_cur = rx_cur;
+        rx_cur = (rx_cur + 1) % E1000_NUM_RX_DESC;
+        write_cmd(REG_RXDESCTAIL, old_cur);
+    }
+}
+
+void network_handler() {
+    uint32_t status = read_cmd(0xC0);
+    if (status & 0x04) {
+        // start_link
+    } else if (status & 0x10) {
+        // Nothing?
+    } else if (status & 0x80) {
+
+    }
+}
+
+int32_t send_packet(const uint8_t *data, uint16_t nbytes) {
+    tx_descs[tx_cur].addr = (uint64_t) (uint32_t) data;
+    tx_descs[tx_cur].length = nbytes;
+    tx_descs[tx_cur].cmd = CMD_EOP | CMD_IFCS | CMD_RS | CMD_RPS;
+    tx_descs[tx_cur].status = 0;
+
+    uint8_t old_cur = tx_cur;
+    tx_cur = (tx_cur + 1) % E1000_NUM_TX_DESC;
+    write_cmd(REG_TXDESCTAIL, tx_cur);
+    while(!(tx_descs[old_cur].status & 0xFF));
+
+    return 0;
 }
