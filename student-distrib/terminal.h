@@ -36,7 +36,7 @@ typedef struct {
 	int32_t ebp;
 
 	//pcb value of first shell of each terminal
-	pcb_t * first_pcb;
+	pcb_t * top_pcb;
 
 	// pointer to video memory for terminal
 	uint8_t *vid_mem;
