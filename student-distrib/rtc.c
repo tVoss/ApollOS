@@ -93,7 +93,7 @@ int32_t rtc_read(int32_t fd, void *buf, int32_t nbytes)
     return 0;
 }
 /*
- * rtc_read(buf, nbytes)
+ * rtc_write(buf, nbytes)
  *
  * DESCRIPTION: writes frequency of rtc
  *

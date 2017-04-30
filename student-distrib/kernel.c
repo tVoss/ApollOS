@@ -15,10 +15,12 @@
 #include "paging.h"
 #include "tests.h"
 #include "terminal.h"
+#include "startimg.h"
 
 /* Macros. */
 /* Check if the bit BIT in FLAGS is set. */
 #define CHECK_FLAG(flags,bit)   ((flags) & (1 << (bit)))
+
 
 /* Check if MAGIC is valid and print the Multiboot information structure
    pointed by ADDR. */
@@ -199,6 +201,9 @@ entry (unsigned long magic, unsigned long addr)
 
     //printf("Executing shell...\n");
 	/* Execute the first program (`shell') ... */
+
+	start_animation();
+
 
 	//printf("Initializing Terminals...");
     init_terminals();

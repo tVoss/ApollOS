@@ -16,7 +16,8 @@
 #define ATTRIB_G		0xA
 #define ATTRIB_Y 		0xE
 #define ATTRIB_B 		0xB
-//#define WELCOME_SIZE	444
+#define CMD_HIST_MAX		10
+
 
 typedef struct {
 

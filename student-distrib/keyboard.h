@@ -23,6 +23,10 @@
 #define F1_KEY			0x3B
 #define F2_KEY			0x3C
 #define F3_KEY			0x3D
+#define ARROW_L 		0x4B
+#define ARROW_R 		0x4D
+#define ARROW_U 		0x48
+#define ARROW_D 		0x50
 
 /* max number of terminals */
 #define MAX_TERMINALS 	3

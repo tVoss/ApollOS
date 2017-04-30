@@ -4,6 +4,7 @@
 #include "types.h"
 #include "paging.h"
 #include "syscalls.h"
+#include "rtc.h"
 
 
 /* global variables */
@@ -134,6 +135,7 @@ int32_t terminal_start(int term){
 
 
 int32_t terminal_save(int term){
+    // save esp, ebp
     terminal[term-1].key_buffer_pos = key_buffer_pos;
     terminal[term-1].pos_x = get_screen_x();
     terminal[term-1].pos_y = get_screen_y();
@@ -143,6 +145,7 @@ int32_t terminal_save(int term){
 
 
 int32_t terminal_load(int term){
+    // load esp, ebp
     key_buffer = terminal[term-1].key_buffer;
     key_buffer_pos = terminal[term-1].key_buffer_pos;
     set_screen_pos(terminal[term-1].pos_x, terminal[term-1].pos_y);
@@ -150,7 +153,6 @@ int32_t terminal_load(int term){
     memcpy((uint8_t *)VIDEO, (uint8_t *)terminal[term-1].vid_mem, 2*NUM_ROWS*NUM_COLS);
     return 0;
 }
-
 
 /*
  * terminal_read()
