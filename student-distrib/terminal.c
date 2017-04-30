@@ -8,9 +8,11 @@
 
 /* global variables */
 volatile terminal_t terminal[MAX_TERMINALS];
-volatile int term_num;      
+volatile int term_num;
 volatile int term_cur;      // keep track of current terminal
 volatile uint8_t *key_buffer;
+volatile int term2_start = 0;
+volatile int term3_start = 0;
 
 /*
  * terminal_open()
@@ -45,7 +47,7 @@ int32_t terminal_close(int32_t fd) {
  * init_terminals()
  *
  * DESCRIPTION: intilaizes the three terminals and starts the
- *              first terminal by default.  
+ *              first terminal by default.
  *
  * INPUTS:      none
  * OUTPUTS:     none
@@ -60,7 +62,9 @@ void init_terminals () {
         terminal[i].key_buffer_pos = 0;
         terminal[i].pos_x = 0;
         terminal[i].pos_y = 0;
-        //terminal[i].init = 0;
+        terminal[i].esp = 0;
+        terminal[i].ebp = 0;
+        terminal[i].init = 0;
         for (j = 0; j < KEY_BUFFER_SIZE; j++){
             terminal[i].key_buffer[j] = '\0';
         }
@@ -84,18 +88,27 @@ void init_terminals () {
     // start all terminals
     term_cur = 1;
     terminal_start(1);
-    terminal_start(2);
-    terminal_start(3);
+    //terminal_start(2);
+    //terminal_start(3);
 }
 
 int32_t switch_terminal(int term) {
     cli();
+    /*
+    uint32_t esp_temp;
+    uint32_t ebp_temp;
+    asm volatile ("movl %%esp,%0 \n\t"					//store current esp and ebp in temporary variables to be put in the current terminal structure
+          "movl %%ebp,%1 \n\t"
+          : "=r"(esp_temp), "=r"(ebp_temp)
+    );
+    terminal[term-1].esp = esp_temp;
+    terminal[term-1].ebp = ebp_temp;*/
     // check if this is current terminal
     if (term == term_cur){
         sti();
         return 0;
     }
-    /*
+
     // check if terminal hasn't been started yet
     if (terminal[term-1].init == 0) {
         // save current termial
@@ -103,23 +116,40 @@ int32_t switch_terminal(int term) {
         // start new terminal
         terminal_start(term);
     }
-    */
+    else
+    {
     // check if termiinal has already been started
     //if (terminal[term-1].init == 1){
     // save current terminal
     terminal_save(term_cur);
     // switch terminals
     terminal_load(term);
+    }
     // update the current terminal tracker
     term_cur = term;
+
     //}
+    /*
+    esp_temp = terminal[term-1].esp;
+    ebp_temp = terminal[term-1].ebp;
+    asm volatile ("movl %0, %%esp \n\t"
+          "movl %1, %%ebp \n\t"
+          :
+          : "r"(esp_temp), "r"(ebp_temp)
+          : "%eax"
+        );*/
     sti();
     return 0;
 }
 
 
-int32_t terminal_start(int term){
-    terminal_load(term);
+int32_t terminal_start(int term)
+{
+    key_buffer = terminal[term-1].key_buffer;
+    key_buffer_pos = terminal[term-1].key_buffer_pos;
+    set_screen_pos(terminal[term-1].pos_x, terminal[term-1].pos_y);
+    update_cursor_loc(get_screen_x(),get_screen_y());
+    memcpy((uint8_t *)VIDEO, (uint8_t *)terminal[term-1].vid_mem, 2*NUM_ROWS*NUM_COLS);
     printf("    _      ____     ___    _       _        ___             ___    ____  \n");
     printf("   / \\    |  _ \\   / _ \\  | |     | |      / _ \\           / _ \\  / ___| \n");
     printf("  / _ \\   | |_) | | | | | | |     | |     | | | |         | | | | \\___ \\ \n");
@@ -128,21 +158,37 @@ int32_t terminal_start(int term){
     printf("                                                  |_____|                \n");
     term_cur = term;
     execute("shell");
-    terminal_save(term);
-    return 0; 
+    //terminal_save(term);
+    return 0;
 }
 
 
 int32_t terminal_save(int term){
+    uint32_t esp_temp;
+    uint32_t ebp_temp;
+    asm volatile ("movl %%esp,%0 \n\t"					//store current esp and ebp in temporary variables to be put in the current terminal structure
+          "movl %%ebp,%1 \n\t"
+          : "=r"(esp_temp), "=r"(ebp_temp)
+    );
+    terminal[term-1].esp = esp_temp;
+    terminal[term-1].ebp = ebp_temp;
     terminal[term-1].key_buffer_pos = key_buffer_pos;
     terminal[term-1].pos_x = get_screen_x();
     terminal[term-1].pos_y = get_screen_y();
     memcpy((uint8_t *)terminal[term-1].vid_mem, (uint8_t *)VIDEO, 2*NUM_ROWS*NUM_COLS);
-    return 0; 
+    return 0;
 }
 
 
 int32_t terminal_load(int term){
+  uint32_t esp_temp = terminal[term-1].esp;
+  uint32_t ebp_temp = terminal[term-1].ebp;
+  asm volatile ("movl %0, %%esp \n\t"
+        "movl %1, %%ebp \n\t"
+        :
+        : "r"(esp_temp), "r"(ebp_temp)
+        : "%eax"
+      );
     key_buffer = terminal[term-1].key_buffer;
     key_buffer_pos = terminal[term-1].key_buffer_pos;
     set_screen_pos(terminal[term-1].pos_x, terminal[term-1].pos_y);
