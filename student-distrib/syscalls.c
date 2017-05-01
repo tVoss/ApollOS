@@ -15,7 +15,6 @@ fileops_t file_ops = {file_open, file_close, file_read, fail};
 fileops_t fail_ops = {fail, fail, fail, fail};
 
 uint8_t processes_flags = 0;
-int8_t active_process = -1;
 
 uint8_t can_execute() {
     int i;
@@ -44,7 +43,7 @@ int32_t halt(uint8_t status) {
     terminal[term_cur-1].num_processes--;
     processes_flags &= ~(1 << pcb->pid);
 
-    if (terminal[term_cur-1].num_processes == 0){
+    if (terminal[term_cur-1].num_processes == 0) {
         execute("shell");
     }
 
@@ -53,7 +52,7 @@ int32_t halt(uint8_t status) {
         execute("shell");
     }
 
-    active_process = pcb->parent_pid;
+    terminal[term_cur - 1].term_pid = pcb->parent_pid;
     remap(VIRTUAL_START, PHYSICAL_START + pcb->parent_pid * FOUR_MB_BLOCK);
     tss.esp0 = pcb->parent_esp;
     tss.ss0 = KERNEL_DS;
@@ -87,13 +86,6 @@ int32_t execute(const int8_t *command) {
     // Must clear arg_buf manually when called as interrupt
     memset(arg_buf, 0, COMMAND_SIZE);
 
-    // check if max number of processes are being run
-    if (!can_execute())
-    {
-        printf("Maximum number of processes reached\n");
-        return 0;
-    }
-
     // Copy command
     for(i = 0; (command[i] != ' ') && (command[i] != '\0') && (command[i] != '\n'); i++)
     {
@@ -101,13 +93,10 @@ int32_t execute(const int8_t *command) {
     }
     com_buf[i] = '\0';
 
-    // Copy all the arguments if we hit a space
-    if (command[i] == ' ') {
-        arg_start = i + 1;
-        for (i = 0; command[i + arg_start] != '\0' && command[i + arg_start] != '\n'; i++) {
-            arg_buf[i] = (int8_t)command[i + arg_start];
-        }
-        arg_buf[i] = '\0';
+    if (strncmp(com_buf, "exit", 4) == 0) {
+        // We got exit passed to execute for some reason...
+        halt(0);
+        return 0;
     }
 
     // Read the file
@@ -121,6 +110,23 @@ int32_t execute(const int8_t *command) {
     if(buffer[0] != MAGIC0 || buffer[1] != MAGIC1 || buffer[2] != MAGIC2 || buffer[3] != MAGIC3) {
         return -1;
     }
+
+    // Check if max number of processes are being run
+    if (!can_execute())
+    {
+        printf("Maximum number of processes reached\n");
+        return 0;
+    }
+
+    // Copy all the arguments if we hit a space
+    if (command[i] == ' ') {
+        arg_start = i + 1;
+        for (i = 0; command[i + arg_start] != '\0' && command[i + arg_start] != '\n'; i++) {
+            arg_buf[i] = (int8_t)command[i + arg_start];
+        }
+        arg_buf[i] = '\0';
+    }
+
 
     // Read first instruction
     read_data(dentry.inode_num, 24, buffer, MAGIC_SIZE);
@@ -143,7 +149,7 @@ int32_t execute(const int8_t *command) {
 
     // Map memory and move program code to execution start
     remap(VIRTUAL_START, PHYSICAL_START + pcb_new->pid * FOUR_MB_BLOCK);
-    read_data(dentry.inode_num, 0, (uint8_t *) EXECUTE_START, PROCESS_SIZE);
+    read_data(dentry.inode_num, 0, (uint8_t *) EXECUTE_START, FOUR_MB_BLOCK);
 
     // Set up flags
     tss.ss0 = KERNEL_DS;
@@ -153,11 +159,8 @@ int32_t execute(const int8_t *command) {
     //pcb_new->parent->ebp = ebp_temp;
     strncpy(pcb_new->args, arg_buf, MAX_ARGS_LENGTH);
 
-    sti();
-
     // Context switch
     asm volatile (
-        "cli\n\t"
         "movw $0x2B, %%ax\n\t"
         "movw %%ax, %%ds\n\t"
         "movl $0x83FFFFC, %%eax\n\t"
@@ -357,13 +360,12 @@ pcb_t *create_pcb() {
     pcb_t *pcb = get_pcb(pid);
     pcb->pid = pid;
 
-    if (active_process == -1 ) {
+    if (terminal[term_cur - 1].num_processes == 0) {
         pcb->parent_pid = pid;
     } else {
-        pcb->parent_pid = get_pcb(active_process)->pid;
+        pcb->parent_pid = terminal[term_cur - 1].term_pid;
     }
 
-    active_process = pid;
     pcb->files[0].fileops = stdin_ops;
     pcb->files[0].flags = FILE_OPEN;
     pcb->files[0].pos = 0;
@@ -404,7 +406,8 @@ uint8_t get_processes_flags()
 {
   return processes_flags;
 }
+
 int8_t get_active_process()
 {
-  return active_process;
+  return terminal[term_cur - 1].term_pid;
 }

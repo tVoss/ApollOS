@@ -40,19 +40,16 @@ void pit_handler(void)
 {
 	cli();
 	send_eoi(PIT_IRQ_LINE);
-	next_terminal = current_terminal;
-	if(next_terminal >= 2)
-	{
-		next_terminal = 0;
-	}
-	else
-	{
-		next_terminal++;
-	}
+
+    // Get the next terminal to inspect
+	next_terminal = (current_terminal + 1) % 3;
+
+    // Find an active terminal
 	while(terminal[next_terminal].init != 1)
 	{
 		next_terminal = (next_terminal + 1) % 3;
 	}
+
 	remap(VIRTUAL_END, EIGHT_MB_BLOCK + terminal[current_terminal].term_pid * FOUR_MB_BLOCK);
 	//uint8_t * screen_start;
 	//vidmap(&screen_start);
@@ -85,27 +82,3 @@ void pit_handler(void)
 	current_terminal = next_terminal;
 	return;
 }
-/*
-static int32_t schedule_array[MAX_PROCESSES] = {[0 ... MAX_PROCESSES -1] = UNUSED};
-static uint32_t current_process = 0;
-
-uint32_t scheduler_c(void)
-{
-		do
-		{
-			current_process = (current_process + 1) % MAX_PROCESSES;
-		} while (schedule_array[current_process] == UNUSED);
-
-		return current_process;
-}
-
-void schedule_new(uint32_t pid)
-{
-	schedule_array[pid] = IN_USE;
-}
-
-void unschedule_old(uint32_t pid)
-{
-	schedule_array[pid] = UNUSED;
-}
-*/

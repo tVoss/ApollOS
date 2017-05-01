@@ -100,6 +100,7 @@ int32_t switch_terminal(int term) {
         return 0;
     }
 
+    // Do we need to launch a new terminal ?
     uint8_t new_term = terminal[term - 1].init == 0;
     if (new_term && !can_execute()) {
         printf("\nPlease close processes before opening another teminal\n391OS> ");
@@ -139,7 +140,7 @@ int32_t terminal_start(int term)
     printf(" / ___ \\  |  __/  | |_| | | |___  | |___  | |_| |         | |_| |  ___) |\n");
     printf("/_/   \\_\\ |_|      \\___/  |_____| |_____|  \\___/   _____   \\___/  |____/ \n");
     printf("                                                  |_____|                \n");
-    
+
     execute("shell");
     return 0;
 }
@@ -172,7 +173,7 @@ int32_t terminal_load(int term){
     set_screen_pos(terminal[term-1].pos_x, terminal[term-1].pos_y);
     update_cursor_loc(get_screen_x(),get_screen_y());
     memcpy((uint8_t *)VIDEO, (uint8_t *)terminal[term-1].vid_mem, 2*NUM_ROWS*NUM_COLS);
-    
+
     asm volatile ("movl %0, %%esp \n\t"
         "movl %1, %%ebp \n\t"
         :

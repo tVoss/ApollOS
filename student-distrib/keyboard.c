@@ -45,6 +45,7 @@ static uint8_t keys_state = 0;    // 0 = nothing pressed
                                   // 1 = shift pressed
                                   // 2 = capslock pressed
                                   // 3 = shift pressed and capslock pressed
+int right_bound = 7;
 
 
 /*
@@ -145,6 +146,14 @@ keyboard_handler()
           if (alt_pressed == 1)
             switch_terminal(3);
           break;
+        // left arrow key pressed
+        case ARROW_LEFT:
+          move_cursor_left();
+          break;
+        // right arrow key pressed
+        case ARROW_RIGHT:
+          move_cursor_right();
+          break;
         // enter pressed
         case ENTER:
           handle_enter();
@@ -193,6 +202,7 @@ key_pressed_handler(uint8_t scancode){
           // update key buffer
           key_buffer[key_buffer_pos] = key_scancodes[keys_state][scancode];
           key_buffer_pos++;
+          right_bound++;
           // display key
           putc(key_scancodes[keys_state][scancode]);
         }
@@ -202,6 +212,7 @@ key_pressed_handler(uint8_t scancode){
 void clear_buffer() {
 
     key_buffer_pos = 0;
+    right_bound = 7;
     int i;
 
     /* uncomment to show the terminal read and write are working */
@@ -228,6 +239,7 @@ void clear_buffer() {
 void
 handle_enter() {
     enter_pressed = 1;    // raise the enter_pressed flag
+    right_bound = 7;
     do_enter();
 }
 
@@ -248,7 +260,52 @@ handle_backpace() {
       // remove backspaced char from buffer by putting null key at that index
       key_buffer_pos--;
       key_buffer[key_buffer_pos] = '\0';
+      right_bound--;
 
       do_backspace();
     }
+}
+
+/*  
+ * move_cursor_left()
+ * 
+ * DESCRIPTION: Moves the cursor left
+ *
+ * INPUTS:  none
+ * OUTPUTS: none
+ * SIDE EFFECTS: cursor is moved to the left one space
+ *
+*/
+void move_cursor_left() {
+  int x, y;
+  x = get_screen_x();
+  y = get_screen_y();
+  if (x != 7){
+    x--;
+    set_screen_pos(x,y);
+    update_cursor_loc(x,y);
+    key_buffer_pos--;
+  }
+}
+
+/*  
+ * move_cursor_right()
+ * 
+ * DESCRIPTION: Moves the cursor right
+ *
+ * INPUTS:  none
+ * OUTPUTS: none
+ * SIDE EFFECTS: cursor is moved to the right one space
+ *
+*/
+void move_cursor_right(){
+  int x,y;
+  x = get_screen_x();
+  y = get_screen_y();
+  if (x < right_bound){
+    x++;
+    set_screen_pos(x,y);
+    update_cursor_loc(x,y);
+    key_buffer_pos++;
+  }
 }
