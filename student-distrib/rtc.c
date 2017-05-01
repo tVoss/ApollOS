@@ -77,7 +77,7 @@ int32_t rtc_open(const int8_t *filename)
 int32_t rtc_close(int32_t fd)
 {
     // Stop interrupts on close
-    disable_irq(RTC_IRQ_LINE)
+    disable_irq(RTC_IRQ_LINE);
     return 0;
 }
 /*
