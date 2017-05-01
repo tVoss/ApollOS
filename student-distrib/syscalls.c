@@ -54,6 +54,7 @@ int32_t halt(uint8_t status) {
 
     terminal[term_cur - 1].term_pid = pcb->parent_pid;
     remap(VIRTUAL_START, PHYSICAL_START + pcb->parent_pid * FOUR_MB_BLOCK);
+
     tss.esp0 = pcb->parent_esp;
     tss.ss0 = KERNEL_DS;
 

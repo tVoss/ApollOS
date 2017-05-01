@@ -50,35 +50,45 @@ void pit_handler(void)
 		next_terminal = (next_terminal + 1) % 3;
 	}
 
-	remap(VIRTUAL_END, EIGHT_MB_BLOCK + terminal[current_terminal].term_pid * FOUR_MB_BLOCK);
-	//uint8_t * screen_start;
-	//vidmap(&screen_start);
-	//pcb_t * current_pcb = get_pcb(terminal[current_terminal].term_pid);
-	//current_terminal = next_terminal;
-	//pcb_t * next_pcb = get_pcb(terminal[next_terminal].term_pid);
+    // We're not changing anything
+    if (next_terminal == current_terminal) {
+        sti();
+        return;
+    }
 
-	if(terminal[next_terminal].num != term_cur)
-	{
-		remapWithPageTable((uint32_t) VIRTUAL_END, (uint32_t) terminal[next_terminal].vid_mem);
-	}
+	remap(VIRTUAL_START, EIGHT_MB_BLOCK + terminal[next_terminal].term_pid * FOUR_MB_BLOCK);
+
+	if(terminal[next_terminal].num != term_cur) {
+        // Video should point to terminal memory
+		remapWithPageTable((uint32_t) VIDEO, (uint32_t) terminal[next_terminal].vid_mem);
+	} else {
+        // Video should point to actual video memory
+        remapWithPageTable(VIDEO, VIDEO);
+    }
 
 	tss.ss0 = KERNEL_DS;
 	//tss.esp0 = EIGHT_MB_BLOCK + EIGHT_KB_BLOCK * terminal[next_terminal].term_pid -4;
-	tss.esp0 = PHYSICAL_START - EIGHT_KB_BLOCK * terminal[next_terminal].term_pid - 4;
-	asm volatile(
-						 "movl %%esp, %0;"
-						 "movl %%ebp, %1;"
-						 :"=r"(terminal[current_terminal].esp), "=r"(terminal[current_terminal].ebp)
-						 :
-						 );
+	//tss.esp0 = PHYSICAL_START - EIGHT_KB_BLOCK * terminal[next_terminal].term_pid - 4;
+    tss.esp0 = PHYSICAL_START - terminal[next_terminal].term_pid * EIGHT_KB_BLOCK - MAGIC_SIZE;
+    // Store current term esp and ebp
+    asm volatile(
+        "movl %%esp, %0;"
+        "movl %%ebp, %1;"
+        :"=r"(terminal[current_terminal].esp), "=r"(terminal[current_terminal].ebp)
+        :
+    );
 
-  asm volatile(
-						 "movl %0, %%esp;"
-						 "movl %1, %%ebp;"
-						 :
-						 :"r"(terminal[next_terminal].esp), "r"(terminal[next_terminal].ebp)
-					 );
+    // Update terminal being processes
+    current_terminal = next_terminal;
 
-	current_terminal = next_terminal;
+    // Update esp and ebp
+    asm volatile(
+        "movl %0, %%esp;"
+        "movl %1, %%ebp;"
+        :
+        :"r"(terminal[current_terminal].esp), "r"(terminal[current_terminal].ebp)
+    );
+
+    sti();
 	return;
 }
