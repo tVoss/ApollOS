@@ -357,7 +357,7 @@ pcb_t *create_pcb() {
     pcb_t *pcb = get_pcb(pid);
     pcb->pid = pid;
 
-    if (active_process == -1 ) {
+    if (active_process == -1) {
         pcb->parent_pid = pid;
     } else {
         pcb->parent_pid = get_pcb(active_process)->pid;

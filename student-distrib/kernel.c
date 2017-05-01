@@ -184,6 +184,7 @@ entry (unsigned long magic, unsigned long addr)
 	 * PIC, any other initialization stuff... */
 
     //printf("Initializing Keyboard... ");
+    start_animation();
     init_keyboard();
     //printf("Done!\n");
 
@@ -200,7 +201,6 @@ entry (unsigned long magic, unsigned long addr)
 
     //printf("Executing shell...\n");
 	/* Execute the first program (`shell') ... */
-	start_animation();
 
 	//printf("Initializing Terminals...");
     init_terminals();
