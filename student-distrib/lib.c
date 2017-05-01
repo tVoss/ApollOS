@@ -26,6 +26,7 @@ clear(void)
     }
     set_screen_pos(0, 0);
     update_cursor_loc(0, 0);
+    printf("391OS> ");
 }
 
 /*

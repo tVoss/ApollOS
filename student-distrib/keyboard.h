@@ -22,6 +22,10 @@
 #define F1_KEY			0x3B
 #define F2_KEY			0x3C
 #define F3_KEY			0x3D
+#define ARROW_UP		0x48
+#define ARROW_LEFT		0x4B
+#define ARROW_RIGHT		0x4D
+#define ARROW_DOWN 		0x50
 
 /* max number of terminals */
 #define MAX_TERMINALS 	3
@@ -31,6 +35,8 @@
 #define BACKSPACE	 	0x0E
 
 #define RELEASE(key)  	(key|0x80)  // key release code
+
+#define HISTORY			10
 
 /* key buffer */
 //extern volatile uint8_t key_buffer[KEY_BUFFER_SIZE];
@@ -52,6 +58,9 @@ void handle_backpace();
 /* handles enter pressed */
 void handle_enter();
 void clear_buffer();
+void load_command();
+void move_cursor_left();
+void move_cursor_right();
 
 
 #endif
