@@ -36,6 +36,8 @@
 /* RTC line constant */
 #define RTC_IRQ_LINE        8
 
+#define NET_IRQ_LINE        11
+
 /* Externally-visible functions */
 
 /* Initialize both PICs */

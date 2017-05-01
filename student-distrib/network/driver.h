@@ -12,6 +12,8 @@
 #define REG_CTRL        0x0000
 #define REG_STATUS      0x0008
 #define REG_EEPROM      0x0014
+#define REG_IREAD       0x00C0 // Interrupt has been read
+
 #define REG_CTRL_EXT    0x0018
 #define REG_IMASK       0x00D0
 #define REG_RCTRL       0x0100
@@ -28,6 +30,9 @@
 #define REG_TXDESCHEAD  0x3810
 #define REG_TXDESCTAIL  0x3818
 
+#define REG_MTA         0x5200
+#define MTA_ELEMS       128
+
 #define REG_RDTR         0x2820 // RX Delay Timer Register
 #define REG_RXDCTL       0x3828 // RX Descriptor Control
 #define REG_RADV         0x282C // RX Int. Absolute Delay Timer
@@ -41,7 +46,8 @@
 #define RCTL_UPE                        (1 << 3)    // Unicast Promiscuous Enabled
 #define RCTL_MPE                        (1 << 4)    // Multicast Promiscuous Enabled
 #define RCTL_LPE                        (1 << 5)    // Long Packet Reception Enable
-#define RCTL_LBM_NONE                   (0 << 6)    // No Loopback
+#define RCTL_LPE_NONE                   0xFFFFFFDF  // No long packets
+#define RCTL_LBM_NONE                   0xFFFFFF3F  // No Loopback
 #define RCTL_LBM_PHY                    (3 << 6)    // PHY or external SerDesc loopback
 #define RTCL_RDMTS_HALF                 (0 << 8)    // Free Buffer Threshold is 1/2 of RDLEN
 #define RTCL_RDMTS_QUARTER              (1 << 8)    // Free Buffer Threshold is 1/4 of RDLEN
@@ -58,11 +64,13 @@
 #define RCTL_PMCF                       (1 << 23)   // Pass MAC Control Frames
 #define RCTL_SECRC                      (1 << 26)   // Strip Ethernet CRC
 
+#define RCTL_RXT0                       (1 << 7)
+
 // Buffer Sizes
 #define RCTL_BSIZE_256                  (3 << 16)
 #define RCTL_BSIZE_512                  (2 << 16)
 #define RCTL_BSIZE_1024                 (1 << 16)
-#define RCTL_BSIZE_2048                 (0 << 16)
+#define RCTL_BSIZE_2048                 0xFFFCFFFF
 #define RCTL_BSIZE_4096                 ((3 << 16) | (1 << 25))
 #define RCTL_BSIZE_8192                 ((2 << 16) | (1 << 25))
 #define RCTL_BSIZE_16384                ((1 << 16) | (1 << 25))
@@ -73,14 +81,15 @@
 #define CMD_IC                          (1 << 2)    // Insert Checksum
 #define CMD_RS                          (1 << 3)    // Report Status
 #define CMD_RPS                         (1 << 4)    // Report Packet Sent
+#define CMD_DEXT                        (1 << 5)    // Legacy Descriptor Mode
 #define CMD_VLE                         (1 << 6)    // VLAN Packet Enable
 #define CMD_IDE                         (1 << 7)    // Interrupt Delay Enable
 
 // TCTL Register
 #define TCTL_EN                         (1 << 1)    // Transmit Enable
 #define TCTL_PSP                        (1 << 3)    // Pad Short Packets
-#define TCTL_CT_SHIFT                   4           // Collision Threshold
-#define TCTL_COLD_SHIFT                 12          // Collision Distance
+#define TCTL_CT                         (1 << 8)           // Collision Threshold
+#define TCTL_COLD                       (1 << 18)          // Collision Distance
 #define TCTL_SWXOFF                     (1 << 22)   // Software XOFF Transmission
 #define TCTL_RTLC                       (1 << 24)   // Re-transmit on Late Collision
 
@@ -89,8 +98,26 @@
 #define TSTA_LC                         (1 << 2)    // Late Collision
 #define LSTA_TU                         (1 << 3)    // Transmit Underrun
 
-#define E1000_NUM_RX_DESC 32
-#define E1000_NUM_TX_DESC 8
+#define E1000_TIPG_IPGT     0
+#define E1000_TIPG_IPGR1    10
+#define E1000_TIPG_IPGR2    20
+
+#define E1000_NUM_RX_DESC   128
+#define E1000_NUM_TX_DESC   32
+#define PACKET_SIZE         2048
+
+// Mac address info
+#define MAC_BYTES           6
+#define MAC_WORDS           MAC_BYTES / 2
+#define RECV_ADRL           0x05400
+#define RECV_ADRH           0x05404
+#define RAH_AV              0x80000000
+
+#define PCI_STATUS_REG      0x04
+#define PCI_CMD_ENABLE      0x07
+#define PCI_NET_ADDR        (1 << 31) | (3 << 11) | PCI_STATUS_REG
+#define PCI_ADDR_PORT       0x0CF8
+#define PCI_DATA_PORT       0x0CFC
 
 typedef struct e1000_rx_desc {
     // Keeping this 64 bit if hardware expects it
@@ -113,10 +140,14 @@ typedef struct e1000_tx_desc {
     volatile uint16_t special;
 } __attribute__((packed)) e1000_tx_desc_t;
 
+typedef struct packet {
+    uint8_t data[PACKET_SIZE];
+} packet_t;
+
 void init_network();
 void network_handler();
 
-uint8_t *get_mac_addr();
-int32_t send_packet(const uint8_t *data, uint16_t nbytes);
+uint16_t *get_mac_addr();
+int32_t net_send_packet(const uint8_t *data, uint16_t nbytes);
 
 #endif

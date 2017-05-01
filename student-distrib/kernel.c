@@ -16,6 +16,7 @@
 #include "tests.h"
 
 #include "network/driver.h"
+#include "network/ethernet.h"
 
 /* Macros. */
 /* Check if the bit BIT in FLAGS is set. */
@@ -174,8 +175,8 @@ entry (unsigned long magic, unsigned long addr)
 
     printf("Initing Network...\n");
     init_network();
-    int8_t *data = "This is a test";
-    send_packet((uint8_t *) data, 16);
+    int8_t *data = "This is a test!";
+    eth_send_data((uint8_t *) data, 16);
 
 	/* Enable interrupts */
 	/* Do not enable the following until after you have set up your
