@@ -284,6 +284,7 @@ void move_cursor_left() {
     x--;
     set_screen_pos(x,y);
     update_cursor_loc(x,y);
+    key_buffer_pos--;
   }
 }
 
@@ -305,5 +306,6 @@ void move_cursor_right(){
     x++;
     set_screen_pos(x,y);
     update_cursor_loc(x,y);
+    key_buffer_pos++;
   }
 }

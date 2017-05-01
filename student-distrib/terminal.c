@@ -99,11 +99,13 @@ int32_t switch_terminal(int term) {
         sti();
         return 0;
     }
-
-    if (!can_execute()) {
-        printf("\nPlease close processes before opening another teminal\n391OS> ");
-        sti();
-        return 0;
+    
+    if (terminal[term-1].init == 0){
+        if (!can_execute()) {
+            printf("\nPlease close processes before opening another teminal\n391OS> ");
+            sti();
+            return 0;
+        }
     }
 
     // Always save
