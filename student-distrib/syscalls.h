@@ -90,5 +90,9 @@ pcb_t *get_current_pcb();
 
 pcb_t *get_pcb(uint32_t pid);
 
+uint8_t get_processes_flags();
+
+int8_t get_active_process();
+
 
 #endif

@@ -16,8 +16,11 @@
 #define CHANNEL_3 0x43
 #define CHANNEL_0_IN 65535
 #define MASK 0xFF
+#define IN_USE 1
+#define UNUSED 0
 
-uint32_t current_terminal = 1;
+uint32_t current_terminal = 0;
+uint32_t next_terminal = 0;
 
 /*
 * void pit_init()
@@ -37,53 +40,72 @@ void pit_handler(void)
 {
 	cli();
 	send_eoi(PIT_IRQ_LINE);
-	uint8_t * screen;
-	screen = VIDEO;
-	uint32_t esp_temp;
-	uint32_t ebp_temp;
-
-	asm volatile ("movl %%esp,%0 \n\t"
-				  "movl %%ebp,%1 \n\t"
-				  : "=r"(esp_temp), "=r"(ebp_temp)
-	); 
-
-	//pcb = terminal[current_terminal].pcb;
-	terminal[current_terminal].esp = esp_temp;
-	terminal[current_terminal].ebp = ebp_temp;
-	current_terminal++;
-
-	if (current_terminal > 3)
+	next_terminal = current_terminal;
+	if(next_terminal >= 2)
 	{
-		current_terminal = 1;
-	}
-
-	while(terminal[current_terminal].num_processes == 0)
-	{
-		current_terminal = (current_terminal + 1)%3;
-	}
-
-	//pcb = terminal[current_terminal].pcb;
-	tss.ss0 = KERNEL_DS;
-	tss.esp0 = PHYSICAL_START - (EIGHT_KB_BLOCK * terminal[current_terminal].term_pid) - 4;
-	remap(VIRTUAL_START, PHYSICAL_START + (terminal[current_terminal].term_pid * FOUR_MB_BLOCK));
-	vidmap(&screen);
-
-	if(terminal[current_terminal].num != current_terminal)
-	{
-		remapVideo((uint32_t)screen, (uint32_t)terminal[current_terminal].vid_mem);
+		next_terminal = 0;
 	}
 	else
 	{
-		remapVideo((uint32_t)screen, (uint32_t)VIDEO);
+		next_terminal++;
 	}
-	asm volatile ("movl %0, %%esp \n\t"
-			  	  "movl %1, %%ebp \n\t"
-			  	  :
-			      : "r"(esp_temp), "r"(ebp_temp)
-				  : "%eax", "%esp", "%ebp"
-	); 
-	sti();
+	while(terminal[next_terminal].init != 1)
+	{
+		next_terminal = (next_terminal + 1) % 3;
+	}
+	remap(VIRTUAL_END, EIGHT_MB_BLOCK + terminal[current_terminal].term_pid * FOUR_MB_BLOCK);
+	//uint8_t * screen_start;
+	//vidmap(&screen_start);
+	//pcb_t * current_pcb = get_pcb(terminal[current_terminal].term_pid);
+	//current_terminal = next_terminal;
+	//pcb_t * next_pcb = get_pcb(terminal[next_terminal].term_pid);
+
+	if(terminal[next_terminal].num != term_cur)
+	{
+		remapWithPageTable((uint32_t) VIRTUAL_END, (uint32_t) terminal[next_terminal].vid_mem);
+	}
+
+	tss.ss0 = KERNEL_DS;
+	tss.esp0 = EIGHT_MB_BLOCK + EIGHT_KB_BLOCK * terminal[next_terminal].term_pid -4;
+
+	asm volatile(
+						 "movl %%esp, %0;"
+						 "movl %%ebp, %1;"
+						 :"=r"(terminal[current_terminal].esp), "=r"(terminal[current_terminal].ebp)    /* outputs */
+						 :                                          /* no input */
+						 );
+
+  asm volatile(
+						 "movl %0, %%esp;"
+						 "movl %1, %%ebp;"
+						 :                                          /* no outputs */
+						 :"r"(terminal[next_terminal].esp), "r"(terminal[next_terminal].ebp)    /* input */
+					 );
+
+	current_terminal = next_terminal;
+	return;
+}
+/*
+static int32_t schedule_array[MAX_PROCESSES] = {[0 ... MAX_PROCESSES -1] = UNUSED};
+static uint32_t current_process = 0;
+
+uint32_t scheduler_c(void)
+{
+		do
+		{
+			current_process = (current_process + 1) % MAX_PROCESSES;
+		} while (schedule_array[current_process] == UNUSED);
+
+		return current_process;
 }
 
+void schedule_new(uint32_t pid)
+{
+	schedule_array[pid] = IN_USE;
+}
 
-
+void unschedule_old(uint32_t pid)
+{
+	schedule_array[pid] = UNUSED;
+}
+*/

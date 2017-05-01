@@ -310,13 +310,13 @@ int32_t getargs(int8_t *buf, int32_t nbytes) {
 }
 
 int32_t vidmap(uint8_t **screen_start) {
-    if (screen_start == NULL) {
+    if (screen_start == NULL || screen_start == (uint8_t**) FOUR_MB_BLOCK) {
         return -1;
     }
     // check if lcoation provided by user is valid
-    if ((int32_t) screen_start < VIRTUAL_START || (int32_t) screen_start > VIRTUAL_END){
+    /*if ((int32_t) screen_start < VIRTUAL_START || (int32_t) screen_start > VIRTUAL_END){
         return -1;
-    }
+    }*/
     remapWithPageTable(VIRTUAL_END,VIDEOMEM);
     *screen_start = (uint8_t *) VIRTUAL_END;
     return 0;
@@ -398,4 +398,13 @@ pcb_t *get_current_pcb() {
 
 pcb_t *get_pcb(uint32_t pid) {
     return (pcb_t *)(PHYSICAL_START - EIGHT_KB_BLOCK * (pid + 1));
+}
+
+uint8_t get_processes_flags()
+{
+  return processes_flags;
+}
+int8_t get_active_process()
+{
+  return active_process;
 }
