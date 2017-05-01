@@ -100,7 +100,8 @@ int32_t switch_terminal(int term) {
         return 0;
     }
 
-    if (!can_execute()) {
+    uint8_t new_term = terminal[term - 1].init == 0;
+    if (new_term && !can_execute()) {
         printf("\nPlease close processes before opening another teminal\n391OS> ");
         sti();
         return 0;
@@ -113,7 +114,7 @@ int32_t switch_terminal(int term) {
     term_cur = term;
 
     // Load or start depending on status
-    if (terminal[term_cur - 1].init == 0) {
+    if (new_term) {
         terminal_start(term_cur);
     } else {
         terminal_load(term_cur);
