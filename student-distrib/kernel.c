@@ -161,7 +161,6 @@ entry (unsigned long magic, unsigned long addr)
     init_keyboard();
 	sti();
 	init_paging();
-	//start_animation();
     init_terminals();
 
 	/* Spin (nicely, so we don't chew up cycles) */
