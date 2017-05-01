@@ -9,6 +9,9 @@
 #define E1000_I217     0x153A  // Device ID for Intel I217
 #define E1000_82577LM  0x10EA  // Device ID for Intel 82577LM
 
+#define E1000_MEM_BASE  0xFEBC0000
+#define E1000_PAGE_BASE 0xFE800000
+
 #define REG_CTRL        0x0000
 #define REG_STATUS      0x0008
 #define REG_EEPROM      0x0014

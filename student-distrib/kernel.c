@@ -167,9 +167,11 @@ entry (unsigned long magic, unsigned long addr)
     // Enable interrutps
     sti();
 
-    // Start up network before paging
+    // Set up paging
+    init_paging();
+
+    // Get online
     init_network();
-	init_paging();
 
     // Start up terminals
     init_terminals();

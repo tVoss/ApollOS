@@ -19,9 +19,9 @@ int32_t eth_send_data(uint8_t *data, uint16_t nbytes) {
     // Source
     memcpy(&frame[6], get_mac_addr(), 6);
 
-    // Size of data
-    frame[12] = (uint8_t) (nbytes & 0xFF00) >> 8;
-    frame[13] = (uint8_t) nbytes & 0x00FF;
+    // Type of data (IPv4)
+    frame[12] = 0x08;
+    frame[13] = 0x00;
 
     // Copy data
     memcpy(&frame[14], data, nbytes);

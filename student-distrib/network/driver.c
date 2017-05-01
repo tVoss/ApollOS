@@ -3,11 +3,7 @@
 #include "../i8259.h"
 #include "../lib.h"
 
-// All constants for qemu
-uint8_t bar_type = 0;           // Type of BAR0 (memory)
-uint16_t io_base = 0xC000;      // IO Base Address
-uint16_t io_base_next = 0xC004; // IO + 4 for data
-uint32_t mem_base = 0xFEBC0000; // MMIO Base Address
+#include "../paging.h"
 
 uint16_t mac[MAC_WORDS];         // MAC Address
 
@@ -21,23 +17,13 @@ e1000_tx_desc_t tx_descs[E1000_NUM_TX_DESC] __attribute__ ((aligned (16)));
 packet_t tx_packets[E1000_NUM_TX_DESC];
 
 // Write a command to the device
-void write_cmd(uint16_t addr, uint32_t value) {
-    if (bar_type == 0) {
-        write32(value, mem_base + addr);
-    } else {
-        outl(addr, io_base);
-        outl(value, io_base_next);
-    }
+void write_cmd(uint32_t addr, uint32_t value) {
+    write32(value, E1000_MEM_BASE + addr);
 }
 
 // Read a command from the device
-uint32_t read_cmd(uint16_t addr) {
-    if (bar_type == 0) {
-        return read32(mem_base + addr);
-    } else {
-        outl(addr, io_base);
-        return inl(io_base_next);
-    }
+uint32_t read_cmd(uint32_t addr) {
+    return read32(E1000_MEM_BASE + addr);
 }
 
 /* Read a value from eeprom */
@@ -162,6 +148,8 @@ void enable_interrupts() {
 }
 
 void init_network() {
+    remap(E1000_PAGE_BASE, E1000_PAGE_BASE);
+
     read_mac();
     enable_mastering();
 

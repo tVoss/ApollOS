@@ -6,6 +6,8 @@
 #include "terminal.h"
 #include "x86_desc.h"
 
+#include "network/ethernet.h"
+
 // All file ops
 fileops_t stdin_ops = {terminal_open, fail, terminal_read, fail};
 fileops_t stdout_ops = {terminal_open, fail, fail, terminal_write};
@@ -24,10 +26,6 @@ uint8_t can_execute() {
         total += terminal[i].num_processes;
     }
     return total < MAX_PROCESSES;
-}
-
-void net_test() {
-    printf("Doing a net test\n");
 }
 
 int32_t halt(uint8_t status) {
@@ -106,7 +104,7 @@ int32_t execute(const int8_t *command) {
     com_buf[i] = '\0';
 
     if (strncmp("net_test", com_buf, 10) == 0) {
-        net_test();
+        network();
         return 0;
     }
 
@@ -341,6 +339,12 @@ int32_t sigreturn() {
 
 int32_t fail() {
     return -1;
+}
+
+int32_t network() {
+    printf("Doing network stuff\n");
+    uint8_t data[] = "Some test data";
+    eth_send_data(data, sizeof(data));
 }
 
 int32_t get_new_pid () {
