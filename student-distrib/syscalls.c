@@ -26,6 +26,10 @@ uint8_t can_execute() {
     return total < MAX_PROCESSES;
 }
 
+void net_test() {
+    printf("Doing a net test\n");
+}
+
 int32_t halt(uint8_t status) {
     cli();
 
@@ -100,6 +104,11 @@ int32_t execute(const int8_t *command) {
         com_buf[i] = (int8_t)command[i];
     }
     com_buf[i] = '\0';
+
+    if (strncmp("net_test", com_buf, 10) == 0) {
+        net_test();
+        return 0;
+    }
 
     // Copy all the arguments if we hit a space
     if (command[i] == ' ') {
