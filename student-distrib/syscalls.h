@@ -23,7 +23,6 @@
 #define EIGHT_KB_BLOCK  0x2000
 #define FOUR_MB_BLOCK   0x400000
 #define EIGHT_MB_BLOCK  0x800000
-#define PROCESS_SIZE    4096
 
 #define VIRTUAL_START  0x8000000      // 128MB
 #define VIRTUAL_END    0x8400000      // 132MB, end of 4 MB page

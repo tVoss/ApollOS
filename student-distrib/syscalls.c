@@ -143,7 +143,7 @@ int32_t execute(const int8_t *command) {
 
     // Map memory and move program code to execution start
     remap(VIRTUAL_START, PHYSICAL_START + pcb_new->pid * FOUR_MB_BLOCK);
-    read_data(dentry.inode_num, 0, (uint8_t *) EXECUTE_START, PROCESS_SIZE);
+    read_data(dentry.inode_num, 0, (uint8_t *) EXECUTE_START, FOUR_MB_BLOCK);
 
     // Set up flags
     tss.ss0 = KERNEL_DS;
