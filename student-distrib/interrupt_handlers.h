@@ -10,4 +10,6 @@ void handle_keyboard();
 /* Handler for Syscalls */
 void handle_syscall();
 
+/*Handler for the pit*/
+void handle_pit();
 #endif

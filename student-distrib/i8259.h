@@ -27,6 +27,8 @@
  * to declare the interrupt finished */
 #define EOI             0x60
 
+#define PIT_IRQ_LINE 0
+
 /* Keyboard line constant */
 #define KEYBOARD_IRQ_LINE   1
 

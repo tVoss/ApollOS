@@ -111,6 +111,7 @@ void init_idt() {
     SET_IDT_ENTRY(idt[INT_RTC], handle_rtc);
     SET_IDT_ENTRY(idt[INT_KEYBOARD], handle_keyboard);
     SET_IDT_ENTRY(idt[INT_SYSCALL], handle_syscall);
+    SET_IDT_ENTRY(idt[INT_PIT], handle_pit);
 
     lidt(idt_desc_ptr);
 }

@@ -14,6 +14,7 @@ name:                               \
 
 MAKE_HANDLER(handle_rtc, rtc_handler);
 MAKE_HANDLER(handle_keyboard, keyboard_handler);
+MAKE_HANDLER(handle_pit, pit_handler);
 
 syscalls:
     .long 0, halt, execute, read, write, open, close, getargs, vidmap, set_handler, sigreturn

@@ -15,6 +15,7 @@
 #include "paging.h"
 #include "tests.h"
 #include "terminal.h"
+#include "scheduler.h"
 
 /* Macros. */
 /* Check if the bit BIT in FLAGS is set. */
@@ -184,6 +185,8 @@ entry (unsigned long magic, unsigned long addr)
 
     //printf("Initializing Keyboard... ");
     init_keyboard();
+
+    pit_init();
     //printf("Done!\n");
 
 	/* Enable interrupts */
