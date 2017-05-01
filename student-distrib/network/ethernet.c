@@ -3,7 +3,7 @@
 #include "../lib.h"
 #include "../types.h"
 #include "driver.h"
-#include "crc.h"
+#include "checksum.h"
 
 int32_t eth_send_data(uint8_t *data, uint16_t nbytes) {
     if (data == NULL || nbytes > MAX_ETH_DATA_SIZE) {

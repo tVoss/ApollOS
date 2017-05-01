@@ -2,6 +2,7 @@
 #include "ethernet.h"
 
 #include "../lib.h"
+#include "checksum.h"
 
 // Preset IP address
 uint8_t ip[] = {192, 168, 10, 3};
@@ -44,18 +45,9 @@ int32_t ip_send_data(uint8_t *data, uint16_t nbytes) {
     // Destination
     memcpy(&packet[16], friend_ip, 4);
 
-    uint16_t *words = (uint16_t *) packet;
-    int i;
-    uint32_t sum = 0;
-    for (i = 0; i < 10; i++) {
-        sum += words[i];
-    }
-
-    while (sum & 0xFFFF0000) {
-        sum = (sum & 0xFFFF) + (sum >> 16);
-    }
-
-    words[5] = ~sum;
+    uint16_t checksum = create_compliment(packet, 20);
+    packet[10] = checksum >> 8;
+    packet[11] = checksum & 0xFF;
 
     memcpy(&packet[20], data, nbytes);
 
