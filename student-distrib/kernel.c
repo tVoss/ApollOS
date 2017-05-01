@@ -14,6 +14,7 @@
 #include "rtc.h"
 #include "paging.h"
 #include "tests.h"
+#include "terminal.h"
 
 #include "network/driver.h"
 #include "network/ethernet.h"
@@ -159,19 +160,34 @@ entry (unsigned long magic, unsigned long addr)
 		ltr(KERNEL_TSS);
 	}
 
-    printf("Welcome to ApollOS\n");
+    //printf("Welcome to ApollOS\n");
+    /*
+		     _      ____     ___    _       _        ___             ___    ____  
+    		/ \    |  _ \   / _ \  | |     | |      / _ \           / _ \  / ___| 
+   		   / _ \   | |_) | | | | | | |     | |     | | | |         | | | | \___ \ 
+		  / ___ \  |  __/  | |_| | | |___  | |___  | |_| |         | |_| |  ___) |
+		 /_/   \_\ |_|      \___/  |_____| |_____|  \___/   _____   \___/  |____/ 
+    			                                           |_____|                
+
+	printf("    _      ____     ___    _       _        ___             ___    ____  \n");
+    printf("   / \\    |  _ \\   / _ \\  | |     | |      / _ \\           / _ \\  / ___| \n");
+   	printf("  / _ \\   | |_) | | | | | | |     | |     | | | |         | | | | \\___ \\ \n");
+  	printf(" / ___ \\  |  __/  | |_| | | |___  | |___  | |_| |         | |_| |  ___) |\n");
+ 	printf("/_/   \\_\\ |_|      \\___/  |_____| |_____|  \\___/   _____   \\___/  |____/ \n");
+	printf("                                                  |_____|                \n");
+	*/
 
 	/* Init the PIC */
-    printf("Initing PIC... ");
+    //printf("Initing PIC... ");
 	i8259_init();
-    printf("Done!\n");
+    //printf("Done!\n");
 
 	/* Initialize devices, memory, filesystem, enable device interrupts on the
 	 * PIC, any other initialization stuff... */
 
-    printf("Initing Keyboard... ");
+    //printf("Initializing Keyboard... ");
     init_keyboard();
-    printf("Done!\n");
+    //printf("Done!\n");
 
     printf("Initing Network...\n");
     init_network();
@@ -189,10 +205,14 @@ entry (unsigned long magic, unsigned long addr)
 	//Turn paging on
 	init_paging();
 
-    printf("Executing shell...\n");
+    //printf("Executing shell...\n");
 	/* Execute the first program (`shell') ... */
 
-    execute("shell");
+	//printf("Initializing Terminals...");
+    init_terminals();
+
+    //execute("shell");
+
 
 	/* Spin (nicely, so we don't chew up cycles) */
 	asm volatile(".1: hlt; jmp .1;");

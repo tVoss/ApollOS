@@ -54,7 +54,9 @@ int32_t rtc_open(const int8_t *filename)
     outb(RTC_REG_A, RTC_PORT);
     prev = inb(CMOS_PORT);
     outb(RTC_REG_A, RTC_PORT);
-    outb((prev & RTC_SET_RATE) | 0, CMOS_PORT);
+    outb((prev & RTC_SET_RATE) | 15, CMOS_PORT);
+
+    int_occur = 0;
 
     // Enable interrupts
     enable_irq(RTC_IRQ_LINE);
@@ -78,6 +80,13 @@ int32_t rtc_close(int32_t fd)
 {
     // Stop interrupts on close
     disable_irq(RTC_IRQ_LINE);
+
+    // Set rate to 0
+    outb(RTC_REG_A, RTC_PORT);
+    char prev = inb(CMOS_PORT);
+    outb(RTC_REG_A, RTC_PORT);
+    outb((prev & RTC_SET_RATE) | 0, CMOS_PORT);
+
     return 0;
 }
 /*

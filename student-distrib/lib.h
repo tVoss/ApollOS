@@ -158,6 +158,20 @@ do {                                    \
 			);                      \
 } while(0)
 
+#define VIDEO 					0xB8000
+#define NUM_COLS 				80
+#define NUM_ROWS 				25
+#define ATTRIB_G				0xA
+#define ATTRIB_Y 				0xE
+#define ATTRIB_B 				0xB
+
+/* The I/O ports */
+#define FB_COMMAND_PORT         0x3D4
+#define FB_DATA_PORT            0x3D5
+/* The I/O port commands */
+#define FB_HIGH_BYTE_COMMAND    14
+#define FB_LOW_BYTE_COMMAND     15
+
 #define read8(addr) *((volatile uint8_t*)(addr));
 #define read16(addr) *((volatile uint16_t*)(addr));
 #define read32(addr) *((volatile uint32_t*)(addr));

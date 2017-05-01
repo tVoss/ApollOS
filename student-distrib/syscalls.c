@@ -17,6 +17,15 @@ fileops_t fail_ops = {fail, fail, fail, fail};
 uint8_t processes_flags = 0;
 int8_t active_process = -1;
 
+uint8_t can_execute() {
+    int i;
+    int total = 0;
+    for (i = 0; i < 3; i++) {
+        total += terminal[i].num_processes;
+    }
+    return total < MAX_PROCESSES;
+}
+
 int32_t halt(uint8_t status) {
     cli();
 
@@ -31,7 +40,13 @@ int32_t halt(uint8_t status) {
         }
     }
 
+    // update number of processes running in current terminal
+    terminal[term_cur-1].num_processes--;
     processes_flags &= ~(1 << pcb->pid);
+
+    if (terminal[term_cur-1].num_processes == 0){
+        execute("shell");
+    }
 
     if (processes_flags == 0) {
         // Nothing is running, fire up a shell
@@ -73,9 +88,9 @@ int32_t execute(const int8_t *command) {
     memset(arg_buf, 0, COMMAND_SIZE);
 
     // check if max number of processes are being run
-    if (processes_flags == MAX_PROCESSES_MASK)
+    if (!can_execute())
     {
-        printf("maximum number of processes reached\n");
+        printf("Maximum number of processes reached\n");
         return 0;
     }
 
@@ -117,6 +132,9 @@ int32_t execute(const int8_t *command) {
         return -1;
     }
 
+    // update number of processes running in current terminal
+    terminal[term_cur-1].num_processes++;
+    terminal[term_cur-1].term_pid = pcb_new->pid;
     asm volatile (
         "movl %%ebp, %0\n\t"
         "movl %%esp, %1\n\t"
@@ -125,7 +143,7 @@ int32_t execute(const int8_t *command) {
 
     // Map memory and move program code to execution start
     remap(VIRTUAL_START, PHYSICAL_START + pcb_new->pid * FOUR_MB_BLOCK);
-    read_data(dentry.inode_num, 0, (uint8_t *) EXECUTE_START, PROCESS_SIZE);
+    read_data(dentry.inode_num, 0, (uint8_t *) EXECUTE_START, FOUR_MB_BLOCK);
 
     // Set up flags
     tss.ss0 = KERNEL_DS;
@@ -346,7 +364,6 @@ pcb_t *create_pcb() {
     }
 
     active_process = pid;
-
     pcb->files[0].fileops = stdin_ops;
     pcb->files[0].flags = FILE_OPEN;
     pcb->files[0].pos = 0;
