@@ -66,20 +66,20 @@ void pit_handler(void)
 	}
 
 	tss.ss0 = KERNEL_DS;
-	tss.esp0 = EIGHT_MB_BLOCK + EIGHT_KB_BLOCK * terminal[next_terminal].term_pid -4;
-
+	//tss.esp0 = EIGHT_MB_BLOCK + EIGHT_KB_BLOCK * terminal[next_terminal].term_pid -4;
+	tss.esp0 = PHYSICAL_START - EIGHT_KB_BLOCK * terminal[next_terminal].term_pid - 4;
 	asm volatile(
 						 "movl %%esp, %0;"
 						 "movl %%ebp, %1;"
-						 :"=r"(terminal[current_terminal].esp), "=r"(terminal[current_terminal].ebp)    /* outputs */
-						 :                                          /* no input */
+						 :"=r"(terminal[current_terminal].esp), "=r"(terminal[current_terminal].ebp)
+						 :
 						 );
 
   asm volatile(
 						 "movl %0, %%esp;"
 						 "movl %1, %%ebp;"
-						 :                                          /* no outputs */
-						 :"r"(terminal[next_terminal].esp), "r"(terminal[next_terminal].ebp)    /* input */
+						 :
+						 :"r"(terminal[next_terminal].esp), "r"(terminal[next_terminal].ebp)
 					 );
 
 	current_terminal = next_terminal;
