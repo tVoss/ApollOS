@@ -34,7 +34,7 @@ typedef struct {
 	int32_t esp;
 	int32_t ebp;
 
-	pcb_t * term_pcb;
+	uint8_t term_pid;
 
 	uint8_t *vid_mem;	// pointer to video memory for terminal
 

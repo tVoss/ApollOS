@@ -87,59 +87,38 @@ void init_terminals () {
         *(uint8_t *)(TERM_3_MEM + (i << 1)) = ' ';
         *(uint8_t *)(TERM_3_MEM + (i << 1) + 1) = ATTRIB_Y;
     }
-    // start all terminals
+    // start first terminals
     term_cur = 1;
     terminal_start(1);
-    //terminal_start(2);
-    //terminal_start(3);
 }
 
 int32_t switch_terminal(int term) {
     cli();
-    /*
-    uint32_t esp_temp;
-    uint32_t ebp_temp;
-    asm volatile ("movl %%esp,%0 \n\t"					//store current esp and ebp in temporary variables to be put in the current terminal structure
-          "movl %%ebp,%1 \n\t"
-          : "=r"(esp_temp), "=r"(ebp_temp)
-    );
-    terminal[term-1].esp = esp_temp;
-    terminal[term-1].ebp = ebp_temp;*/
     // check if this is current terminal
     if (term == term_cur){
         sti();
         return 0;
     }
 
-    // check if terminal hasn't been started yet
-    if (terminal[term-1].init == 0) {
-        // save current termial
-        terminal_save(term_cur);
-        // start new terminal
-        terminal_start(term);
+    if (!can_execute()) {
+        printf("\nPlease close processes before opening another teminal\n391OS> ");
+        sti();
+        return 0;
     }
-    else
-    {
-    // check if termiinal has already been started
-    //if (terminal[term-1].init == 1){
-    // save current terminal
+
+    // Always save
     terminal_save(term_cur);
-    // switch terminals
-    terminal_load(term);
-    }
-    // update the current terminal tracker
+
+    // Update current term
     term_cur = term;
 
-    //}
-    /*
-    esp_temp = terminal[term-1].esp;
-    ebp_temp = terminal[term-1].ebp;
-    asm volatile ("movl %0, %%esp \n\t"
-          "movl %1, %%ebp \n\t"
-          :
-          : "r"(esp_temp), "r"(ebp_temp)
-          : "%eax"
-        );*/
+    // Load or start depending on status
+    if (terminal[term_cur - 1].init == 0) {
+        terminal_start(term_cur);
+    } else {
+        terminal_load(term_cur);
+    }
+
     sti();
     return 0;
 }
@@ -147,6 +126,7 @@ int32_t switch_terminal(int term) {
 
 int32_t terminal_start(int term)
 {
+    terminal[term-1].init = 1;
     key_buffer = terminal[term-1].key_buffer;
     key_buffer_pos = terminal[term-1].key_buffer_pos;
     set_screen_pos(terminal[term-1].pos_x, terminal[term-1].pos_y);
@@ -158,16 +138,13 @@ int32_t terminal_start(int term)
     printf(" / ___ \\  |  __/  | |_| | | |___  | |___  | |_| |         | |_| |  ___) |\n");
     printf("/_/   \\_\\ |_|      \\___/  |_____| |_____|  \\___/   _____   \\___/  |____/ \n");
     printf("                                                  |_____|                \n");
-    term_cur = term;
+    
     execute("shell");
-    //terminal_save(term);
     return 0;
 }
 
 
 int32_t terminal_save(int term){
-    esp_temp;
-    ebp_temp;
     asm volatile ("movl %%esp,%0 \n\t"					//store current esp and ebp in temporary variables to be put in the current terminal structure
           "movl %%ebp,%1 \n\t"
           : "=r"(esp_temp), "=r"(ebp_temp)
@@ -178,29 +155,30 @@ int32_t terminal_save(int term){
     terminal[term-1].pos_x = get_screen_x();
     terminal[term-1].pos_y = get_screen_y();
     memcpy((uint8_t *)terminal[term-1].vid_mem, (uint8_t *)VIDEO, 2*NUM_ROWS*NUM_COLS);
-    remap(VIRTUAL_START, PHYSICAL_START + terminal[term-1].term_pcb->parent_pid * FOUR_MB_BLOCK);
-    tss.esp0 = terminal[term-1].term_pcb->parent_esp;
-    tss.ss0 = KERNEL_DS;
     return 0;
 }
 
 
 int32_t terminal_load(int term){
-  esp_temp = terminal[term-1].esp;
-  ebp_temp = terminal[term-1].ebp;
-  asm volatile ("movl %0, %%esp \n\t"
-        "movl %1, %%ebp \n\t"
-        :
-        : "r"(esp_temp), "r"(ebp_temp)
-        : "%eax"
-      );
+    esp_temp = terminal[term-1].esp;
+    ebp_temp = terminal[term-1].ebp;
+
+    tss.ss0 = KERNEL_DS;
+    tss.esp0 = PHYSICAL_START - terminal[term-1].term_pid * EIGHT_KB_BLOCK - MAGIC_SIZE;
+    remap(VIRTUAL_START, PHYSICAL_START + terminal[term-1].term_pid * FOUR_MB_BLOCK);
     key_buffer = terminal[term-1].key_buffer;
     key_buffer_pos = terminal[term-1].key_buffer_pos;
     set_screen_pos(terminal[term-1].pos_x, terminal[term-1].pos_y);
     update_cursor_loc(get_screen_x(),get_screen_y());
     memcpy((uint8_t *)VIDEO, (uint8_t *)terminal[term-1].vid_mem, 2*NUM_ROWS*NUM_COLS);
-    tss.ss0 = KERNEL_DS;
-    tss.esp0 = PHYSICAL_START - terminal[term_cur-1].term_pcb->pid * EIGHT_KB_BLOCK - MAGIC_SIZE;
+    
+    asm volatile ("movl %0, %%esp \n\t"
+        "movl %1, %%ebp \n\t"
+        :
+        : "r"(esp_temp), "r"(ebp_temp)
+        : "%eax"
+      );
+
     return 0;
 }
 

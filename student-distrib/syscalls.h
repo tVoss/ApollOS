@@ -60,6 +60,8 @@ typedef struct pcb {
     uint32_t parent_ebp;
 } pcb_t;
 
+uint8_t can_execute();
+
 int32_t halt(uint8_t status);
 
 int32_t execute(const int8_t *command);

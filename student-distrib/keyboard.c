@@ -83,6 +83,8 @@ keyboard_handler()
     /* Read from the keyboard's data buffer */
     uint32_t scancode = inb(KEYBOARD_PORT);
 
+    send_eoi(KEYBOARD_IRQ_LINE);
+
     if (scancode != 0xE0){
       switch (scancode) {
         // shift pressed
@@ -157,7 +159,6 @@ keyboard_handler()
       }
     }
 
-    send_eoi(KEYBOARD_IRQ_LINE);
     sti();
 }
 
