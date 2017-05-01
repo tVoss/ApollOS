@@ -37,7 +37,7 @@ int32_t halt(uint8_t status) {
         // Nothing is running, fire up a shell
         execute("shell");
     }
-
+    terminal[term_cur-1].term_pcb->pid = pcb->parent_pid;
     active_process = pcb->parent_pid;
     remap(VIRTUAL_START, PHYSICAL_START + pcb->parent_pid * FOUR_MB_BLOCK);
     tss.esp0 = pcb->parent_esp;
@@ -63,12 +63,14 @@ int32_t execute(const int8_t *command) {
     uint8_t buffer[MAGIC_SIZE] = {0};
     uint8_t i;
     int arg_start;
+    int total_processes;
 
     // Must clear arg_buf manually when called as interrupt
     memset(arg_buf, 0, COMMAND_SIZE);
 
     // check if max number of processes are being run
-    if (processes_flags == MAX_PROCESSES_MASK)
+    total_processes = 3+terminal[0].num_processes+terminal[1].num_processes+terminal[2].num_processes;
+    if (total_processes == MAX_PROCESSES)
     {
         printf("maximum number of processes reached\n");
         return 0;
@@ -111,8 +113,12 @@ int32_t execute(const int8_t *command) {
     if(pcb_new == NULL) {
         return -1;
     }
-    terminal[term_cur-1].esp = pcb_new->parent_esp;
-    terminal[term_cur-1].ebp = pcb_new->parent_ebp;
+
+    terminal[term_cur-1].num_processes++;
+
+    //terminal[term_cur-1].esp = pcb_new->parent_esp;
+    //terminal[term_cur-1].ebp = pcb_new->parent_ebp;
+    terminal[term_cur-1].term_pcb = pcb_new;
     asm volatile (
         "movl %%ebp, %0\n\t"
         "movl %%esp, %1\n\t"
@@ -331,7 +337,7 @@ pcb_t *create_pcb() {
     }
 
     active_process = pid;
-
+    terminal[term_cur-1].term_pcb->pid = pcb;
     pcb->files[0].fileops = stdin_ops;
     pcb->files[0].flags = FILE_OPEN;
     pcb->files[0].pos = 0;

@@ -4,15 +4,16 @@
 #include "types.h"
 #include "paging.h"
 #include "syscalls.h"
-
+#include "x86_desc.h"
 
 /* global variables */
 volatile terminal_t terminal[MAX_TERMINALS];
 volatile int term_num;
 volatile int term_cur;      // keep track of current terminal
 volatile uint8_t *key_buffer;
-volatile int term2_start = 0;
-volatile int term3_start = 0;
+
+uint32_t esp_temp;
+uint32_t ebp_temp;
 
 /*
  * terminal_open()
@@ -64,6 +65,7 @@ void init_terminals () {
         terminal[i].pos_y = 0;
         terminal[i].esp = 0;
         terminal[i].ebp = 0;
+        terminal[i].num_processes = 0;
         terminal[i].init = 0;
         for (j = 0; j < KEY_BUFFER_SIZE; j++){
             terminal[i].key_buffer[j] = '\0';
@@ -164,8 +166,8 @@ int32_t terminal_start(int term)
 
 
 int32_t terminal_save(int term){
-    uint32_t esp_temp;
-    uint32_t ebp_temp;
+    esp_temp;
+    ebp_temp;
     asm volatile ("movl %%esp,%0 \n\t"					//store current esp and ebp in temporary variables to be put in the current terminal structure
           "movl %%ebp,%1 \n\t"
           : "=r"(esp_temp), "=r"(ebp_temp)
@@ -176,13 +178,16 @@ int32_t terminal_save(int term){
     terminal[term-1].pos_x = get_screen_x();
     terminal[term-1].pos_y = get_screen_y();
     memcpy((uint8_t *)terminal[term-1].vid_mem, (uint8_t *)VIDEO, 2*NUM_ROWS*NUM_COLS);
+    remap(VIRTUAL_START, PHYSICAL_START + terminal[term-1].term_pcb->parent_pid * FOUR_MB_BLOCK);
+    tss.esp0 = terminal[term-1].term_pcb->parent_esp;
+    tss.ss0 = KERNEL_DS;
     return 0;
 }
 
 
 int32_t terminal_load(int term){
-  uint32_t esp_temp = terminal[term-1].esp;
-  uint32_t ebp_temp = terminal[term-1].ebp;
+  esp_temp = terminal[term-1].esp;
+  ebp_temp = terminal[term-1].ebp;
   asm volatile ("movl %0, %%esp \n\t"
         "movl %1, %%ebp \n\t"
         :
@@ -194,6 +199,8 @@ int32_t terminal_load(int term){
     set_screen_pos(terminal[term-1].pos_x, terminal[term-1].pos_y);
     update_cursor_loc(get_screen_x(),get_screen_y());
     memcpy((uint8_t *)VIDEO, (uint8_t *)terminal[term-1].vid_mem, 2*NUM_ROWS*NUM_COLS);
+    tss.ss0 = KERNEL_DS;
+    tss.esp0 = PHYSICAL_START - terminal[term_cur-1].term_pcb->pid * EIGHT_KB_BLOCK - MAGIC_SIZE;
     return 0;
 }
 

@@ -4,7 +4,6 @@
 #include "types.h"
 #include "keyboard.h"
 #include "syscalls.h"
-#include "x86_desc.h"
 
 #define MAX_TERMINALS 	3
 #define TERM_MEM 		0x6400000		// 100MB
@@ -18,8 +17,8 @@
 #define ATTRIB_G		0xA
 #define ATTRIB_Y 		0xE
 #define ATTRIB_B 		0xB
-#define ONETWENTYEIGHT_MB 0x08000000
-//#define WELCOME_SIZE	444
+#define CMD_HIST_MAX		10
+
 
 typedef struct {
 
@@ -27,7 +26,7 @@ typedef struct {
 	uint8_t key_buffer[KEY_BUFFER_SIZE];
 	uint32_t key_buffer_pos;
 
-	//cursor x,y location
+	// cursor x,y location
 	int pos_x;
 	int pos_y;
 
@@ -35,11 +34,11 @@ typedef struct {
 	int32_t esp;
 	int32_t ebp;
 
-	//pcb value of first shell of each terminal
-	pcb_t * top_pcb;
+	pcb_t * term_pcb;
 
-	// pointer to video memory for terminal
-	uint8_t *vid_mem;
+	uint8_t *vid_mem;	// pointer to video memory for terminal
+
+	int num_processes;
 
 	int init;	// has the terminal been launched? yes(1), no(0)
 
