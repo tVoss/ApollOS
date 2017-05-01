@@ -43,11 +43,17 @@ Multiple Terminals: fixed setting stackframe for terminal switch
 April 30, 2017. Kelly, Lee
 Multiple Terminals: map video memory to correct allocated terminal memory.
 
+April 30, 2017. Lee, Voss
+Multiple Terminals: fixed page faults and erratic behaviour.
+
 April 30, 2017. Voss
 RTC: fixed delay wit cat rtc
 
 April 31, 2017. Kelly, Lee, Voss
-Multiple terminals: keyboard disabled when switching terminals.  
+Multiple terminals: keyboard disabled when switching terminals.
+
+May 1, 2017. Voss
+System Calls: fixed counter and fish  
 
 May 1, 2017. Alex
 Multiple Terminals: fixed switching terminals with max processes.  
