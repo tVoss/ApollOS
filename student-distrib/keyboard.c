@@ -121,8 +121,11 @@ keyboard_handler()
           break;
         // alt pressed
         case ALT_L:
-        case ALT_R:
           alt_pressed = 1;
+          break;
+        //alt released
+        case RELEASE(ALT_L):
+          alt_pressed = 0;
           break;
         // switching terminals
         case F1_KEY:

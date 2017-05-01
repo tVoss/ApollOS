@@ -16,7 +16,6 @@
 /* keyboard scancodes */
 #define CTRL 			0x1D
 #define ALT_L 			0x38
-#define ALT_R			0xB8
 #define SHIFT_L 		0x2A
 #define SHIFT_R 		0x36
 #define CAPSLOCK 		0x3A

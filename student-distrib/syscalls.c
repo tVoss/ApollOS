@@ -111,7 +111,8 @@ int32_t execute(const int8_t *command) {
     if(pcb_new == NULL) {
         return -1;
     }
-
+    terminal[term_cur-1].esp = pcb_new->parent_esp;
+    terminal[term_cur-1].ebp = pcb_new->parent_ebp;
     asm volatile (
         "movl %%ebp, %0\n\t"
         "movl %%esp, %1\n\t"

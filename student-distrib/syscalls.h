@@ -5,8 +5,8 @@
 
 #define MAX_FILES 8
 #define MAX_ARGS_LENGTH 128
-#define MAX_PROCESSES_MASK 0xFF
-#define MAX_PROCESSES 8
+#define MAX_PROCESSES_MASK 0x3F
+#define MAX_PROCESSES 6
 
 // Flags
 #define FILE_OPEN 0x00000001
@@ -22,6 +22,7 @@
 #define USER_STACK      0x83FFFFC
 #define EIGHT_KB_BLOCK  0x2000
 #define FOUR_MB_BLOCK   0x400000
+#define EIGHT_MB_BLOCK  0x800000
 #define PROCESS_SIZE    4096
 
 #define VIRTUAL_START  0x8000000      // 128MB
