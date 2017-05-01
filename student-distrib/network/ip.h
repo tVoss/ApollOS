@@ -3,12 +3,9 @@
 
 #include "../types.h"
 
-typedef struct ip_v4_addr {
-    uint8_t octets[4];
-} ip_v4_addr_t;
+#define MAX_IP_DATA_SIZE    1480
+#define MAX_IP_PACKET_SIZE  1500
 
-typedef struct ip_v6_addr {
-    uint8_t hextets[8];
-} ip_v6_addr_t;
+int32_t ip_send_data(uint8_t *data, uint16_t nbytes);
 
 #endif

@@ -202,7 +202,7 @@ void network_handler() {
     sti();
 }
 
-int32_t net_send_packet(const uint8_t *data, uint16_t nbytes) {
+int32_t net_send_data(const uint8_t *data, uint16_t nbytes) {
     // Get Tail index
     uint32_t tail = read_cmd(REG_TXDESCTAIL);
 

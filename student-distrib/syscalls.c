@@ -7,6 +7,7 @@
 #include "x86_desc.h"
 
 #include "network/ethernet.h"
+#include "network/ip.h"
 
 // All file ops
 fileops_t stdin_ops = {terminal_open, fail, terminal_read, fail};
@@ -344,7 +345,7 @@ int32_t fail() {
 int32_t network() {
     printf("Doing network stuff\n");
     uint8_t data[] = "Some test data";
-    eth_send_data(data, sizeof(data));
+    ip_send_data(data, sizeof(data));
 }
 
 int32_t get_new_pid () {

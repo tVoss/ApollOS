@@ -151,6 +151,6 @@ void init_network();
 void network_handler();
 
 uint16_t *get_mac_addr();
-int32_t net_send_packet(const uint8_t *data, uint16_t nbytes);
+int32_t net_send_data(const uint8_t *data, uint16_t nbytes);
 
 #endif
