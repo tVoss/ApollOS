@@ -92,6 +92,16 @@ void init_terminals () {
     terminal_start(1);
 }
 
+/*
+ * switch_terminals(int term)
+ *
+ * DESCRIPTION: swiches temrinals
+ *
+ * INPUTS:      term - which terminal to swtich to
+ * OUTPUTS:     0 on success, -1 on failure
+ * SIDE EFFECTS: switches terminals
+ *
+*/
 int32_t switch_terminal(int term) {
     cli();
     // check if this is current terminal
@@ -125,7 +135,16 @@ int32_t switch_terminal(int term) {
     return 0;
 }
 
-
+/*
+ * terminal_start(int term)
+ *
+ * DESCRIPTION: starts the terminal
+ *
+ * INPUTS:      term - which terminal to start
+ * OUTPUTS:     0 on success, -1 on failure
+ * SIDE EFFECTS: starts terminal, execute shell
+ *
+*/
 int32_t terminal_start(int term)
 {
     terminal[term-1].init = 1;
@@ -145,7 +164,16 @@ int32_t terminal_start(int term)
     return 0;
 }
 
-
+/*
+ * terminal_save(int term)
+ *
+ * DESCRIPTION: saves terminal data
+ *
+ * INPUTS:      term - which terminal to save
+ * OUTPUTS:     0 on success, -1 on failure
+ * SIDE EFFECTS: copies video memory to terminal memory, sets stackframe, tss.
+ *
+*/
 int32_t terminal_save(int term){
     asm volatile ("movl %%esp,%0 \n\t"					//store current esp and ebp in temporary variables to be put in the current terminal structure
           "movl %%ebp,%1 \n\t"
@@ -160,7 +188,16 @@ int32_t terminal_save(int term){
     return 0;
 }
 
-
+/*
+ * terminal_load(int term)
+ *
+ * DESCRIPTION: loads terminal data
+ *
+ * INPUTS:      term - which terminal to load
+ * OUTPUTS:     0 on success, -1 on failure
+ * SIDE EFFECTS: copies terminal memory to video memory, sets stackframe, tss.
+ *
+*/
 int32_t terminal_load(int term){
     esp_temp = terminal[term-1].esp;
     ebp_temp = terminal[term-1].ebp;

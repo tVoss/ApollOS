@@ -16,6 +16,16 @@ fileops_t fail_ops = {fail, fail, fail, fail};
 
 uint8_t processes_flags = 0;
 
+/*
+ * can_execute()
+ *
+ * DESCRIPTION: check whether another terminal can be opened
+ *
+ * INPUTS: none
+ * OUTPUTS: none
+ * SIDE EFFECTS: returns 0 if can't execute, and 1 if can execute
+ *
+*/
 uint8_t can_execute() {
     int i;
     int total = 0;
@@ -25,6 +35,16 @@ uint8_t can_execute() {
     return total < MAX_PROCESSES;
 }
 
+/*
+ * halt(uint8_t status)
+ *
+ * DESCRIPTION: terminates current process
+ *
+ * INPUTS: status
+ * OUTPUTS: status
+ * SIDE EFFECTS: restores values of parent process
+ *
+*/
 int32_t halt(uint8_t status) {
     cli();
 
@@ -68,6 +88,16 @@ int32_t halt(uint8_t status) {
     return status;
 }
 
+/*
+ * execute(const int8_t *command)
+ *
+ * DESCRIPTION: load and execute a new program
+ *
+ * INPUTS: command
+ * OUTPUTS: 0 on sucess, -1 on failure
+ * SIDE EFFECTS: hands processor off to new program
+ *
+*/
 int32_t execute(const int8_t *command) {
     cli();
 
@@ -184,6 +214,18 @@ int32_t execute(const int8_t *command) {
     return 0;
 }
 
+/*
+ * read(int32_t fd, void *buf, int32_t nbytes)
+ *
+ * DESCRIPTION: read data
+ *
+ * INPUTS: fd - where to read data from
+ *         buf - data
+ *         nbytes - amount of data to read
+ * OUTPUTS: 0 on sucess, -1 on failure
+ * SIDE EFFECTS: reads data
+ *
+*/  
 int32_t read(int32_t fd, void *buf, int32_t nbytes) {
     if (fd < 0 || fd >= MAX_FILES || buf == NULL) {
         return -1;
@@ -199,6 +241,18 @@ int32_t read(int32_t fd, void *buf, int32_t nbytes) {
     return pcb->files[fd].fileops.read(fd, (int8_t *)buf, nbytes);
 }
 
+/*
+ * write(int32_t fd, void *buf, int32_t nbytes)
+ *
+ * DESCRIPTION: writes data
+ *
+ * INPUTS: fd - where to write data to
+ *         buf - data
+ *         nbytes - amount of data to write
+ * OUTPUTS: 0 on sucess, -1 on failure
+ * SIDE EFFECTS: writes data
+ *
+*/
 int32_t write(int32_t fd, const void *buf, int32_t nbytes) {
     if (fd < 0 || fd >= MAX_FILES || buf == NULL) {
         return -1;
@@ -214,6 +268,16 @@ int32_t write(int32_t fd, const void *buf, int32_t nbytes) {
     return pcb->files[fd].fileops.write(fd, buf, nbytes);
 }
 
+/*
+ * open(const int8_t *filename)
+ *
+ * DESCRIPTION: access the filesystem
+ *
+ * INPUTS: filename
+ * OUTPUTS: 0 on sucess, -1 on failure
+ * SIDE EFFECTS: allocates fd, setup data to handle file type
+ *
+*/
 int32_t open(const int8_t *filename) {
     if (filename == NULL) {
         return -1;
@@ -269,6 +333,16 @@ int32_t open(const int8_t *filename) {
     return i;
 }
 
+/*
+ * close(int32_t fd)
+ *
+ * DESCRIPTION: closes file
+ *
+ * INPUTS: fd
+ * OUTPUTS: 0 on sucess, -1 on failure
+ * SIDE EFFECTS: deallocated fd, maing it available
+ *
+*/
 int32_t close(int32_t fd) {
     if (fd < 0 || fd >= MAX_FILES) {
         return -1;
@@ -292,6 +366,17 @@ int32_t close(int32_t fd) {
     return err;
 }
 
+/*
+ * getargs(int8_t *buf, int32_t nbytes)
+ *
+ * DESCRIPTION: reads command line argument into user-level buffer
+ *
+ * INPUTS: buf - data to read
+ *         nbytes - amount of data to read
+ * OUTPUTS: 0 on sucess, -1 on failure
+ * SIDE EFFECTS: argument stored as task data for loaded program
+ *
+*/
 int32_t getargs(int8_t *buf, int32_t nbytes) {
     if (buf == NULL) {
         return -1;
@@ -312,6 +397,16 @@ int32_t getargs(int8_t *buf, int32_t nbytes) {
     return 0;
 }
 
+/*
+ * vidmap(uint8_t **screen_start)
+ *
+ * DESCRIPTION: maps video memory to virtual address
+ *
+ * INPUTS: screen_start
+ * OUTPUTS: 0 on sucess, -1 on failure
+ * SIDE EFFECTS: maps video memeory to pre-set virtual address
+ *
+*/
 int32_t vidmap(uint8_t **screen_start) {
     if (screen_start == NULL) {
         return -1;
@@ -325,18 +420,50 @@ int32_t vidmap(uint8_t **screen_start) {
     return 0;
 }
 
+/*
+ * set_handler(int32_t signum, void *handler_address)
+ *
+ * for signal handling
+ *
+*/
 int32_t set_handler(int32_t signum, void *handler_address) {
     return -1;
 }
 
+/*
+ * sigreturn()
+ *
+ * for signal handling
+ *
+*/
 int32_t sigreturn() {
     return -1;
 }
 
+/*
+ * fail()
+ *
+ * DESCRIPTION: failure
+ *
+ * INPUTS: none
+ * OUTPUTS: -1
+ * SIDE EFFECTS: none
+ *
+*/
 int32_t fail() {
     return -1;
 }
 
+/*
+ * get_new_pid()
+ *
+ * DESCRIPTION: get pid 
+ *
+ * INPUTS: none
+ * OUTPUTS: 0 on sucess, -1 on failure
+ * SIDE EFFECTS: updates processes_flags
+ *
+*/
 int32_t get_new_pid () {
     int i;
     for (i = 0; i < MAX_PROCESSES; i++) {
@@ -351,6 +478,16 @@ int32_t get_new_pid () {
     return -1;
 }
 
+/*
+ * create_pcb()
+ *
+ * DESCRIPTION: creates a new pcb 
+ *
+ * INPUTS: none
+ * OUTPUTS: new pcb
+ * SIDE EFFECTS: sets all relevant data for new pcb
+ *
+*/
 pcb_t *create_pcb() {
     int32_t pid = get_new_pid();
     if (pid < 0) {
@@ -387,6 +524,16 @@ pcb_t *create_pcb() {
     return pcb;
 }
 
+/*
+ * get_current_pcb()
+ *
+ * DESCRIPTION: gets the current pcb 
+ *
+ * INPUTS: none
+ * OUTPUTS: current pcb
+ * SIDE EFFECTS: gets current pcb
+ *
+*/
 pcb_t *get_current_pcb() {
     pcb_t *pcb;
     asm volatile(
@@ -398,6 +545,16 @@ pcb_t *get_current_pcb() {
     return pcb;
 }
 
+/*
+ * get_pcb(uint32_t pid)
+ *
+ * DESCRIPTION: get pcb
+ *
+ * INPUTS: pid - process identification number
+ * OUTPUTS: physical memory of pcb
+ * SIDE EFFECTS: none
+ *
+*/
 pcb_t *get_pcb(uint32_t pid) {
     return (pcb_t *)(PHYSICAL_START - EIGHT_KB_BLOCK * (pid + 1));
 }
