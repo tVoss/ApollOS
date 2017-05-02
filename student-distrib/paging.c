@@ -5,17 +5,19 @@
 #include "paging.h"
 #include "types.h"
 
-//page directory global array
-uint32_t pageDir[1024] __attribute__((aligned(4096)));
+#define ARR_SIZE 1024
+#define FOUR_KB 4096
+#define FOUR_MB 4194304
+#define VID_MEM_LOC 0xB8
+#define RW_FLAGS 0x87
+#define PAGE_DIR_FLAGS 0x83
+#define RWP_FLAGS 7
 
-//page table global array
-uint32_t pageTable[1024] __attribute__((aligned(4096)));
-
-//user page table glabal array
-uint32_t userTable[1024] __attribute__((aligned(4096)));
-
-//video memory global array
-uint32_t videoTable[1024] __attribute__((aligned(4096)));
+//global arrays
+uint32_t pageDir[ARR_SIZE] __attribute__((aligned(FOUR_KB)));
+uint32_t pageTable[ARR_SIZE] __attribute__((aligned(FOUR_KB)));
+uint32_t userTable[ARR_SIZE] __attribute__((aligned(FOUR_KB)));
+uint32_t videoTable[ARR_SIZE] __attribute__((aligned(FOUR_KB)));
 
 /*
 * Function: init_paging()
@@ -26,23 +28,23 @@ uint32_t videoTable[1024] __attribute__((aligned(4096)));
 void init_paging()
 {
   int i;
-  for(i = 0; i < 1024; i++)
+  for(i = 0; i <  ARR_SIZE; i++)
   {
     //set the read/write flag to allow reading and writing
     pageDir[i] = 0x00000002;
 
     //sets 12 bit to i and 0-11 are zero'd. Set r/w flag
-    pageTable[i] = (4096 * i) | 2;
+    pageTable[i] = (FOUR_KB * i) | 2;
   }
 
   //add page table to the directory and set r/w and present flags
   pageDir[0] = (unsigned int) pageTable | 3;
 
   //map kernal block (4 MB), set size, rw, and present flags
-  pageDir[1] = 4194304 | 0x83;
+  pageDir[1] = FOUR_MB | PAGE_DIR_FLAGS;
 
   //page table entry for video memory
-  pageTable[0xB8] |= 3;
+  pageTable[VID_MEM_LOC] |= 3;
 
   //turn on paging
   asm volatile(
@@ -71,9 +73,9 @@ void init_paging()
 void remap(uint32_t vAddr, uint32_t pAddr)
 {
   //page directory entry (divide by 4MB)
-  uint32_t entry = vAddr / 4194304;
+  uint32_t entry = vAddr / FOUR_MB;
   //sets size, user, present, r/w  flags
-  pageDir[entry] = pAddr | 0x87;
+  pageDir[entry] = pAddr | RW_FLAGS;
   //refresh
   refresh_tbl();
 }
@@ -88,11 +90,11 @@ void remap(uint32_t vAddr, uint32_t pAddr)
 void remapWithPageTable(uint32_t vAddr, uint32_t pAddr)
 {
   //page directory entry (divide by 4MB)
-  uint32_t entry = vAddr / 4194304;
+  uint32_t entry = vAddr / FOUR_MB;
   //sets user level, read/write, present flags
-  pageDir[entry] = ((unsigned int)userTable) | 7;
+  pageDir[entry] = ((unsigned int)userTable) | RWP_FLAGS;
   //sets user, read/write, present flags
-  userTable[0] = pAddr | 7;
+  userTable[0] = pAddr | RWP_FLAGS;
   //refresh
   refresh_tbl();
 }
@@ -107,11 +109,11 @@ void remapWithPageTable(uint32_t vAddr, uint32_t pAddr)
 void remapVideo(uint32_t vAddr, uint32_t pAddr)
 {
   //page directory entry (divide by 4MB)
-  uint32_t entry = vAddr / 4194304;
+  uint32_t entry = vAddr / FOUR_MB;
   //sets user level, read/write, present flags
-  pageDir[entry] = ((unsigned int)videoTable) | 7;
+  pageDir[entry] = ((unsigned int)videoTable) | RWP_FLAGS;
   //sets user, read/write, present flags
-  videoTable[0] = pAddr | 7;
+  videoTable[0] = pAddr | RWP_FLAGS;
   refresh_tbl();
 }
 
@@ -126,11 +128,11 @@ void remapVideo(uint32_t vAddr, uint32_t pAddr)
 void remapToPage(uint32_t vAddr, uint32_t pAddr, uint32_t page)
 {
   //page directory entry
-  uint32_t entry = vAddr / 4194304;
+  uint32_t entry = vAddr / FOUR_MB;
   //sets user level, read/write, present flags
-  pageDir[entry] = ((unsigned int)userTable) | 7;
+  pageDir[entry] = ((unsigned int)userTable) | RWP_FLAGS;
   //sets user, read/write, present flags
-  userTable[page] = pAddr | 7;
+  userTable[page] = pAddr | RWP_FLAGS;
   //refresh
   refresh_tbl();
 }

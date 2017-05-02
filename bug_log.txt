@@ -1,0 +1,68 @@
+March 8, 2017. Voss
+GDT: actually completed gdt
+
+March 12, 2017. Lee
+Keyboard driver: cursor positing now updating
+
+March 12, 2017. Lee
+Keyboard driver: keyboard state fixed
+
+March 12, 2017. Kelly, Voss
+RTC driver: fixed RTC interrupts 
+
+March 27, 2017. Lee
+Scrolling: fixed scrolling
+
+April 16, 2017. Voss
+System Calls: fixed syscalls conflicts
+
+April 16, 2017. Voss
+RTC: fixed rtc
+
+April 23, 2017. Voss 
+RTC: Fixed dir and rtc code
+
+April 23, 2017. Voss
+System Calls: fixed grep
+
+April 26, 2017. Voss
+System Calls: added null checks
+
+April 26, 2017. Voss
+System Calls: fixed getargs
+
+April 26, 2017. Voss
+System Calls: fixed cat cat
+
+April 27, 2017. Voss
+RTC: closed rtc
+
+April 30, 2017. Lee
+Multiple Terminals: fixed setting stackframe for terminal switch
+
+April 30, 2017. Kelly, Lee
+Multiple Terminals: map video memory to correct allocated terminal memory.
+
+April 30, 2017. Lee, Voss
+Multiple Terminals: fixed page faults and erratic behaviour.
+
+April 30, 2017. Voss
+RTC: fixed delay wit cat rtc
+
+April 31, 2017. Kelly, Lee, Voss
+Multiple terminals: keyboard disabled when switching terminals.
+
+May 1, 2017. Voss
+System Calls: fixed counter and fish  
+
+May 1, 2017. Alex
+Multiple Terminals: fixed switching terminals with max processes.  
+
+May 1, 2017: Kelly, Weng
+Scheduler: OS crash with keyboard interrupt.  
+
+May 1, 2017. Voss
+Multiple Terminals: fixed exit from terminal root shell. 
+
+May 1, 2017, Kelly, Weng
+Scheduler: fixed crash when running second process

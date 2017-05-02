@@ -158,56 +158,13 @@ entry (unsigned long magic, unsigned long addr)
 		ltr(KERNEL_TSS);
 	}
 
-    //printf("Welcome to ApollOS\n");
-    /*
-		     _      ____     ___    _       _        ___             ___    ____  
-    		/ \    |  _ \   / _ \  | |     | |      / _ \           / _ \  / ___| 
-   		   / _ \   | |_) | | | | | | |     | |     | | | |         | | | | \___ \ 
-		  / ___ \  |  __/  | |_| | | |___  | |___  | |_| |         | |_| |  ___) |
-		 /_/   \_\ |_|      \___/  |_____| |_____|  \___/   _____   \___/  |____/ 
-    			                                           |_____|                
-
-	printf("    _      ____     ___    _       _        ___             ___    ____  \n");
-    printf("   / \\    |  _ \\   / _ \\  | |     | |      / _ \\           / _ \\  / ___| \n");
-   	printf("  / _ \\   | |_) | | | | | | |     | |     | | | |         | | | | \\___ \\ \n");
-  	printf(" / ___ \\  |  __/  | |_| | | |___  | |___  | |_| |         | |_| |  ___) |\n");
- 	printf("/_/   \\_\\ |_|      \\___/  |_____| |_____|  \\___/   _____   \\___/  |____/ \n");
-	printf("                                                  |_____|                \n");
-	*/
-
-	/* Init the PIC */
-    //printf("Initing PIC... ");
 	i8259_init();
-    //printf("Done!\n");
-
-	/* Initialize devices, memory, filesystem, enable device interrupts on the
-	 * PIC, any other initialization stuff... */
-
-    //printf("Initializing Keyboard... ");
     init_keyboard();
-
     pit_init();
-    //printf("Done!\n");
 
-	/* Enable interrupts */
-	/* Do not enable the following until after you have set up your
-	 * IDT correctly otherwise QEMU will triple fault and simple close
-	 * without showing you any output */
-	//printf("Enabling Interrupts... ");
 	sti();
-    //printf("Done!\n");
-
-	//Turn paging on
 	init_paging();
-
-    //printf("Executing shell...\n");
-	/* Execute the first program (`shell') ... */
-
-	//printf("Initializing Terminals...");
     init_terminals();
-
-    //execute("shell");
-
 
 	/* Spin (nicely, so we don't chew up cycles) */
 	asm volatile(".1: hlt; jmp .1;");
