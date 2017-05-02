@@ -176,6 +176,8 @@ int32_t execute(const int8_t *command) {
         "movl %%esp, %1\n\t"
         : "=r" (pcb_new->parent_ebp), "=r" (pcb_new->parent_esp)
     );
+    terminal[term_cur-1].ebp = pcb_new->parent_ebp;
+    terminal[term_cur-1].esp = pcb_new->parent_esp;
 
     // Map memory and move program code to execution start
     remap(VIRTUAL_START, PHYSICAL_START + pcb_new->pid * FOUR_MB_BLOCK);
@@ -225,7 +227,7 @@ int32_t execute(const int8_t *command) {
  * OUTPUTS: 0 on sucess, -1 on failure
  * SIDE EFFECTS: reads data
  *
-*/  
+*/
 int32_t read(int32_t fd, void *buf, int32_t nbytes) {
     if (fd < 0 || fd >= MAX_FILES || buf == NULL) {
         return -1;
@@ -457,7 +459,7 @@ int32_t fail() {
 /*
  * get_new_pid()
  *
- * DESCRIPTION: get pid 
+ * DESCRIPTION: get pid
  *
  * INPUTS: none
  * OUTPUTS: 0 on sucess, -1 on failure
@@ -481,7 +483,7 @@ int32_t get_new_pid () {
 /*
  * create_pcb()
  *
- * DESCRIPTION: creates a new pcb 
+ * DESCRIPTION: creates a new pcb
  *
  * INPUTS: none
  * OUTPUTS: new pcb
@@ -527,7 +529,7 @@ pcb_t *create_pcb() {
 /*
  * get_current_pcb()
  *
- * DESCRIPTION: gets the current pcb 
+ * DESCRIPTION: gets the current pcb
  *
  * INPUTS: none
  * OUTPUTS: current pcb
@@ -562,8 +564,4 @@ pcb_t *get_pcb(uint32_t pid) {
 uint8_t get_processes_flags()
 {
   return processes_flags;
-}
-int8_t get_active_process()
-{
-  return active_process;
 }

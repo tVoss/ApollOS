@@ -40,19 +40,21 @@ void pit_handler(void)
 {
 	cli();
 	send_eoi(PIT_IRQ_LINE);
-	next_terminal = current_terminal;
-	if(next_terminal >= 2)
-	{
-		next_terminal = 0;
-	}
-	else
-	{
-		next_terminal++;
-	}
+
+    // Get next terminal
+    next_terminal = (current_terminal + 1) % 3;
+
+    // Loop through until finding an active one
 	while(terminal[next_terminal].init != 1)
 	{
 		next_terminal = (next_terminal + 1) % 3;
 	}
+
+    if (current_terminal == next_terminal) {
+        sti();
+        return;
+    }
+
 	remap(VIRTUAL_END, EIGHT_MB_BLOCK + terminal[current_terminal].term_pid * FOUR_MB_BLOCK);
 	//uint8_t * screen_start;
 	//vidmap(&screen_start);
@@ -69,18 +71,18 @@ void pit_handler(void)
 	//tss.esp0 = EIGHT_MB_BLOCK + EIGHT_KB_BLOCK * terminal[next_terminal].term_pid -4;
 	tss.esp0 = PHYSICAL_START - EIGHT_KB_BLOCK * terminal[next_terminal].term_pid - 4;
 	asm volatile(
-						 "movl %%esp, %0;"
-						 "movl %%ebp, %1;"
-						 :"=r"(terminal[current_terminal].esp), "=r"(terminal[current_terminal].ebp)
-						 :
-						 );
+        "movl %%esp, %0;"
+        "movl %%ebp, %1;"
+        :"=r"(terminal[current_terminal].esp), "=r"(terminal[current_terminal].ebp)
+        :
+    );
 
-  asm volatile(
-						 "movl %0, %%esp;"
-						 "movl %1, %%ebp;"
-						 :
-						 :"r"(terminal[next_terminal].esp), "r"(terminal[next_terminal].ebp)
-					 );
+    asm volatile(
+        "movl %0, %%esp;"
+        "movl %1, %%ebp;"
+        :
+        :"r"(terminal[next_terminal].esp), "r"(terminal[next_terminal].ebp)
+    );
 
 	current_terminal = next_terminal;
 	return;
