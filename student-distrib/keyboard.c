@@ -209,6 +209,16 @@ key_pressed_handler(uint8_t scancode){
     }
 }
 
+/*
+ * clear_buffer()
+ *
+ * DESCRIPTION: clears the keyboard buffer
+ *
+ * INPUTS:      none
+ * OUTPUTS:     none
+ * SIDE EFFECTS: clears keyboard buffer
+ *
+*/
 void clear_buffer() {
 
     key_buffer_pos = 0;
